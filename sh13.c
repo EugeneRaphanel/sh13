@@ -238,7 +238,7 @@ int main(int argc, char ** argv)
     while (!quit)
     {
         if (SDL_PollEvent(&event))
-	     {
+	      {
           switch (event.type)
           {
               case SDL_QUIT:
@@ -312,43 +312,39 @@ int main(int argc, char ** argv)
                   SDL_GetMouseState( &mx, &my );
                   break;
           }
-	}
+	   }
 
+        // message reçu par le thread réseau, à traiter par la boucle graphique
         if (synchro==1)
         {
-  //              pthread_mutex_lock( &mutex );
-                printf("consomme |%s|\n",gbuffer);
-		switch (gbuffer[0])
-		{
-			// Message 'I' : le joueur recoit son Id
-			case 'I':
-				// RAJOUTER DU CODE ICI
-
-				break;
-			// Message 'L' : le joueur recoit la liste des joueurs
-			case 'L':
-				// RAJOUTER DU CODE ICI
-
-				break;
-			// Message 'D' : le joueur recoit ses trois cartes
-			case 'D':
-				// RAJOUTER DU CODE ICI
-
-				break;
-			// Message 'M' : le joueur recoit le n° du joueur courant
-			// Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go
-			case 'M':
-				// RAJOUTER DU CODE ICI
-
-				break;
-			// Message 'V' : le joueur recoit une valeur de tableCartes
-			case 'V':
-				// RAJOUTER DU CODE ICI
-
-				break;
-		}
-		synchro=0;
-    //            pthread_mutex_unlock( &mutex );
+            // pthread_mutex_lock( &mutex );
+            printf("consomme |%s|\n",gbuffer);
+            switch (gbuffer[0])
+            {
+                // Message 'I' : le joueur recoit son Id
+                case 'I':
+                    // RAJOUTER DU CODE ICI
+                    break;
+                // Message 'L' : le joueur recoit la liste des joueurs
+                case 'L':
+                    // RAJOUTER DU CODE ICI
+                    break;
+                // Message 'D' : le joueur recoit ses trois cartes
+                case 'D':
+                    // RAJOUTER DU CODE ICI
+                    break;
+                // Message 'M' : le joueur recoit le n° du joueur courant
+                // Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go
+                case 'M':
+                    // RAJOUTER DU CODE ICI
+                    break;
+                // Message 'V' : le joueur recoit une valeur de tableCartes
+                case 'V':
+                    // RAJOUTER DU CODE ICI
+                    break;
+            }
+            synchro=0;
+            //  pthread_mutex_unlock( &mutex );
         }
 
         SDL_Rect dstrect_grille = { 512-250, 10, 500, 350 };
