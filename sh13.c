@@ -25,7 +25,7 @@ int objetSel;                 // objet selectionné par la souris
 int guiltSel;                 // coupable selectionné par la souris
 int guiltGuess[13];
 int tableCartes[4][8];
-int b[3];
+int b[3];                     // cartes joueurs
 int goEnabled;                // quand ==1 et que 4 joueurs sont disponibles, fait apparaitre un bouton lançant la partie
 int connectEnabled;           // quand ==1, fait apparaitre un bouton qui permet de se connecter au serveur
 
@@ -321,31 +321,22 @@ int main(int argc, char ** argv)
             printf("consomme |%s|\n",gbuffer);
             switch (gbuffer[0])
             {
-                // Message 'I' : le joueur recoit son Id
-                case 'I':
-                    // RAJOUTER DU CODE ICI
+                case 'I': // le joueur recoit son Id
+                    // I 1
                     sscanf(gbuffer, "%d", &gId);
                     break;
-                // Message 'L' : le joueur recoit la liste des joueurs
-                case 'L':
-                    // RAJOUTER DU CODE ICI
+                case 'L': // le joueur recoit la liste des joueurs
                     // L Elyoth _ _ _
-
                     sscanf(gbuffer + 1, "%s %s %s %s", gNames[0], gNames[1], gNames[2], gNames[3]);
-                    for(int i = 0; i<4; i++)
-                      printf("name : %s \n", gNames[i]);
                     break;
-                // Message 'D' : le joueur recoit ses trois cartes
-                case 'D':
-                    // RAJOUTER DU CODE ICI
+                case 'D': // le joueur recoit ses trois cartes
+                    // sscanf(gbuffer, "%d %d %d", b[0],b[1],b[2]);
                     break;
-                // Message 'M' : le joueur recoit le n° du joueur courant
                 // Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go
-                case 'M':
+                case 'M': // le joueur recoit le n° du joueur courant
                     // RAJOUTER DU CODE ICI
                     break;
-                // Message 'V' : le joueur recoit une valeur de tableCartes
-                case 'V':
+                case 'V':   // le joueur recoit une valeur de tableCartes
                     // RAJOUTER DU CODE ICI
                     break;
             }
