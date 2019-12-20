@@ -231,7 +231,7 @@ int main(int argc, char ** argv)
    /* Creation du thread serveur tcp. */
    printf ("Creation du thread serveur tcp !\n");
    synchro=0;
-    // Met dans l'objet thread la fonction à accomplir
+    // Met dans l'objet thread la fonction à accomplir et lance le thread
    ret = pthread_create ( & thread_serveur_tcp_id, NULL, fn_serveur_tcp, NULL);
 
     // boucle graphique
@@ -324,6 +324,8 @@ int main(int argc, char ** argv)
                 // Message 'I' : le joueur recoit son Id
                 case 'I':
                     // RAJOUTER DU CODE ICI
+                    sscanf(gbuffer, "%d", &gId);
+                    printf("Id : %d !!!\n", gId);
                     break;
                 // Message 'L' : le joueur recoit la liste des joueurs
                 case 'L':
