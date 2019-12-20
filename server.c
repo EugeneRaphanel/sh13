@@ -276,9 +276,9 @@ int main(int argc, char *argv[])
 
         if (fsmServer==0) // machine à etat
         {
-        	switch (buffer[0])1111
+        	switch (buffer[0]) 
         	{
-                	case 'C': 
+                	case 'C':
                         	sscanf(buffer,"%c %s %d %s", &com, clientIpAddress, &clientPort, clientName);
                         	printf("COM=%c ipAddress=%s port=%d name=%s\n",com, clientIpAddress, clientPort, clientName);
 

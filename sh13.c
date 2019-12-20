@@ -10,24 +10,24 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-//pthread_t thread_serveur_tcp_id;
+pthread_t thread_serveur_tcp_id;  // objet thread, à qui on fournit une fonction à réaliser dans le thread
 //pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-char gbuffer[256];
-char gServerIpAddress[256];
-int gServerPort;
-char gClientIpAddress[256];
-int gClientPort;
-char gName[256];
-char gNames[4][256];
+char gbuffer[256];    // recepetion du message du serveur principal dans le thread reseau
+char gServerIpAddress[256];   // adresse IP du serveur principal (args ./sh13)
+int gServerPort;              // port du serveur principal (args ./sh13)
+char gClientIpAddress[256];   // adresse IP du thread réseau du client (args ./sh13)
+int gClientPort;              // port du thread réseau client (args ./sh13)
+char gName[256];              // nom du joueur spécifié en argument (args ./sh13)
+char gNames[4][256];          // noms des joueurs connectés (envoyés par le serveur)
 int gId;
-int joueurSel;
-int objetSel;
-int guiltSel;
+int joueurSel;                // joueur selectionné par la souris
+int objetSel;                 // objet selectionné par la souris
+int guiltSel;                 // coupable selectionné par la souris
 int guiltGuess[13];
 int tableCartes[4][8];
 int b[3];
-int goEnabled;
-int connectEnabled;
+int goEnabled;                // quand ==1 et que 4 joueurs sont disponibles, fait apparaitre un bouton lançant la partie
+int connectEnabled;           // quand ==1, fait apparaitre un bouton qui permet de se connecter au serveur
 
 char *nbobjets[]={"5","5","5","5","4","3","3","3"};
 char *nbnoms[]={"Sebastian Moran", "irene Adler", "inspector Lestrade",
@@ -35,8 +35,17 @@ char *nbnoms[]={"Sebastian Moran", "irene Adler", "inspector Lestrade",
   "inspector Hopkins", "Sherlock Holmes", "John Watson", "Mycroft Holmes",
   "Mrs. Hudson", "Mary Morstan", "James Moriarty"};
 
+/*
+    volatile car modifié par le thread reseau et par le processus de base (main)
+    Il peut donc y avoir un conflit entre les deux contextes d'execution de ces deux fils
+    On ira donc chercher la vrai valeur de synchro à chaque fois, donc dans la RAM, et non dans le cache qui contient les piles
+    mis à 1 par le thread reseau quand il recoit un message
+    tant qu'il n'est pas remis à 0 par la boucle graphique, on ne receptionne pas de nouveau message (thread bloqué)
+    mis à 0 par la boucle graphique quand elle traite le message receptionner par le thread reseau
+*/
 volatile int synchro;
 
+// thread reseau
 void *fn_serveur_tcp(void *arg)
 {
         int sockfd, newsockfd, portno;
@@ -87,10 +96,10 @@ void *fn_serveur_tcp(void *arg)
                 //pthread_mutex_unlock( &mutex );
 
                 while (synchro);
-
      }
 }
 
+// dans la boucle graphique, creation d'un socket temporaire pour l'envoie d'un message au serveur principal
 void sendMessageToServer(char *ipAddress, int portno, char *mess)
 {
     int sockfd, n;
@@ -123,32 +132,19 @@ void sendMessageToServer(char *ipAddress, int portno, char *mess)
     close(sockfd);
 }
 
-/* Fonction pour le thread serveur tcp
-static void * fn_serveur_tcp (void * p_data)
-{
-   while (1)
-   {
-	printf("Je suis le thread serveur\n");
-	sleep(1);
-   }
-
-   return NULL;
-}
-*/
-
 int main(int argc, char ** argv)
 {
-	int ret;
-	int i,j;
+        int ret;
+        int i,j;
 
-    int quit = 0;
-    SDL_Event event;
-	int mx,my;
-	char sendBuffer[256];
-	char lname[256];
-	int id;
+        int quit = 0;
+        SDL_Event event;
+        int mx,my;
+        char sendBuffer[256];
+        char lname[256];
+        int id;
 
-        if (argc<6)
+        if (argc != 6)  // anciennement argc < 6
         {
                 printf("<app> <Main server ip address> <Main server port> <Client ip address> <Client port> <player name>\n");
                 exit(1);
@@ -160,15 +156,15 @@ int main(int argc, char ** argv)
         gClientPort=atoi(argv[4]);
         strcpy(gName,argv[5]);
 
-    SDL_Init(SDL_INIT_VIDEO);
-	TTF_Init();
+        SDL_Init(SDL_INIT_VIDEO);
+        TTF_Init();
 
-    SDL_Window * window = SDL_CreateWindow("SDL2 SH13",
+        SDL_Window * window = SDL_CreateWindow("SDL2 SH13",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1024, 768, 0);
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+        SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
 
-    SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton;
+        SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton;
 
 	deck[0] = IMG_Load("SH13_0.png");
 	deck[1] = IMG_Load("SH13_1.png");
@@ -219,7 +215,7 @@ int main(int argc, char ** argv)
 	goEnabled=0;
 	connectEnabled=1;
 
-    SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8];
+  SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8];
 
 	for (i=0;i<13;i++)
 		texture_deck[i] = SDL_CreateTextureFromSurface(renderer, deck[i]);
@@ -235,86 +231,87 @@ int main(int argc, char ** argv)
    /* Creation du thread serveur tcp. */
    printf ("Creation du thread serveur tcp !\n");
    synchro=0;
+    // Met dans l'objet thread la fonction à accomplir
    ret = pthread_create ( & thread_serveur_tcp_id, NULL, fn_serveur_tcp, NULL);
 
+    // boucle graphique
     while (!quit)
     {
-	if (SDL_PollEvent(&event))
-	{
-		//printf("un event\n");
-        	switch (event.type)
-        	{
-            		case SDL_QUIT:
-                		quit = 1;
-                		break;
-			case  SDL_MOUSEBUTTONDOWN:
-				SDL_GetMouseState( &mx, &my );
-				//printf("mx=%d my=%d\n",mx,my);
-				if ((mx<200) && (my<50) && (connectEnabled==1))
-				{
-					sprintf(sendBuffer,"C %s %d %s",gClientIpAddress,gClientPort,gName);
+        if (SDL_PollEvent(&event))
+	     {
+          switch (event.type)
+          {
+              case SDL_QUIT:
+              		quit = 1;
+              		break;
 
-					// RAJOUTER DU CODE ICI
+              case  SDL_MOUSEBUTTONDOWN:
+                  SDL_GetMouseState( &mx, &my );
+                  printf("mx=%d my=%d\n",mx,my);
+                  if ((mx<200) && (my<50) && (connectEnabled==1))
+                  {
+                    printf("connect button pressed\n");
+                    sprintf(sendBuffer,"C %s %d %s",gClientIpAddress,gClientPort,gName);
+                    // RAJOUTER DU CODE ICI
+                    // Envoyer la demande de connexion au serveur principal
+                    connectEnabled=0;
+                  }
 
-					connectEnabled=0;
-				}
-				else if ((mx>=0) && (mx<200) && (my>=90) && (my<330))
-				{
-					joueurSel=(my-90)/60;
-					guiltSel=-1;
-				}
-				else if ((mx>=200) && (mx<680) && (my>=0) && (my<90))
-				{
-					objetSel=(mx-200)/60;
-					guiltSel=-1;
-				}
-				else if ((mx>=100) && (mx<250) && (my>=350) && (my<740))
-				{
-					joueurSel=-1;
-					objetSel=-1;
-					guiltSel=(my-350)/30;
-				}
-				else if ((mx>=250) && (mx<300) && (my>=350) && (my<740))
-				{
-					int ind=(my-350)/30;
-					guiltGuess[ind]=1-guiltGuess[ind];
-				}
-				else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled==1))
-				{
-					printf("go! joueur=%d objet=%d guilt=%d\n",joueurSel, objetSel, guiltSel);
-					if (guiltSel!=-1)
-					{
-						sprintf(sendBuffer,"G %d %d",gId, guiltSel);
-
-					// RAJOUTER DU CODE ICI
-
-					}
-					else if ((objetSel!=-1) && (joueurSel==-1))
-					{
-						sprintf(sendBuffer,"O %d %d",gId, objetSel);
-
-					// RAJOUTER DU CODE ICI
-
-					}
-					else if ((objetSel!=-1) && (joueurSel!=-1))
-					{
-						sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
-
-					// RAJOUTER DU CODE ICI
-
-					}
-				}
-				else
-				{
-					joueurSel=-1;
-					objetSel=-1;
-					guiltSel=-1;
-				}
-				break;
-			case  SDL_MOUSEMOTION:
-				SDL_GetMouseState( &mx, &my );
-				break;
-        	}
+                  else if ((mx>=0) && (mx<200) && (my>=90) && (my<330))
+                  {
+                      printf("player selected\n");
+                      joueurSel=(my-90)/60;
+                      guiltSel=-1;
+                  }
+                  else if ((mx>=200) && (mx<680) && (my>=0) && (my<90))
+                  {
+                      printf("object selected\n");
+                      objetSel=(mx-200)/60;
+                      guiltSel=-1;
+                  }
+                  else if ((mx>=100) && (mx<250) && (my>=350) && (my<740))
+                  {
+                      printf("guilty selected\n");
+                      joueurSel=-1;
+                      objetSel=-1;
+                      guiltSel=(my-350)/30;
+                  }
+                  else if ((mx>=250) && (mx<300) && (my>=350) && (my<740))
+                  {
+                      printf("cross hit\n");
+                      int ind=(my-350)/30;
+                      guiltGuess[ind]=1-guiltGuess[ind];
+                  }
+                  else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled==1))
+                  {
+                      printf("go! joueur=%d objet=%d guilt=%d\n",joueurSel, objetSel, guiltSel);
+                      if (guiltSel!=-1)
+                      {
+                        sprintf(sendBuffer,"G %d %d",gId, guiltSel);
+                        // RAJOUTER DU CODE ICI
+                      }
+                      else if ((objetSel!=-1) && (joueurSel==-1))
+                      {
+                        sprintf(sendBuffer,"O %d %d",gId, objetSel);
+                        // RAJOUTER DU CODE ICI
+                      }
+                      else if ((objetSel!=-1) && (joueurSel!=-1))
+                      {
+                        sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
+                        // RAJOUTER DU CODE ICI
+                      }
+                  }
+                  else
+                  {
+                      joueurSel=-1;
+                      objetSel=-1;
+                      guiltSel=-1;
+                  }
+                  break;
+              case  SDL_MOUSEMOTION:
+                  SDL_GetMouseState( &mx, &my );
+                  break;
+          }
 	}
 
         if (synchro==1)
