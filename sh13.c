@@ -325,11 +325,15 @@ int main(int argc, char ** argv)
                 case 'I':
                     // RAJOUTER DU CODE ICI
                     sscanf(gbuffer, "%d", &gId);
-                    printf("Id : %d !!!\n", gId);
                     break;
                 // Message 'L' : le joueur recoit la liste des joueurs
                 case 'L':
                     // RAJOUTER DU CODE ICI
+                    // L Elyoth _ _ _
+
+                    sscanf(gbuffer + 1, "%s %s %s %s", gNames[0], gNames[1], gNames[2], gNames[3]);
+                    for(int i = 0; i<4; i++)
+                      printf("name : %s \n", gNames[i]);
                     break;
                 // Message 'D' : le joueur recoit ses trois cartes
                 case 'D':
