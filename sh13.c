@@ -12,13 +12,13 @@
 
 pthread_t thread_serveur_tcp_id;  // objet thread, à qui on fournit une fonction à réaliser dans le thread
 //pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-char gbuffer[256];    // recepetion du message du serveur principal dans le thread reseau
+char gbuffer[256];            // recepetion du message du serveur principal dans le thread reseau
 char gServerIpAddress[256];   // adresse IP du serveur principal (args ./sh13)
 int gServerPort;              // port du serveur principal (args ./sh13)
 char gClientIpAddress[256];   // adresse IP du thread réseau du client (args ./sh13)
 int gClientPort;              // port du thread réseau client (args ./sh13)
 char gName[256];              // nom du joueur spécifié en argument (args ./sh13)
-char gNames[4][256];          // noms des joueurs connectés (envoyés par le serveur)
+char gNames[4][256];          // noms des joueurs connectés (envoyé par le serveur)
 int gId;
 int joueurSel;                // joueur selectionné par la souris
 int objetSel;                 // objet selectionné par la souris
@@ -140,7 +140,7 @@ int main(int argc, char ** argv)
         int quit = 0;
         SDL_Event event;
         int mx,my;
-        char sendBuffer[256];
+        char sendBuffer[256];   // Buffer pour les messages à envoyer au serveur principal
         char lname[256];
         int id;
 
@@ -251,9 +251,9 @@ int main(int argc, char ** argv)
                   if ((mx<200) && (my<50) && (connectEnabled==1))
                   {
                     printf("connect button pressed\n");
+                    // Creation du message d'envoie
                     sprintf(sendBuffer,"C %s %d %s",gClientIpAddress,gClientPort,gName);
-                    // RAJOUTER DU CODE ICI
-                    // Envoyer la demande de connexion au serveur principal
+                    sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
                     connectEnabled=0;
                   }
 
