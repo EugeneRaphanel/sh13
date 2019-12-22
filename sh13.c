@@ -1,6 +1,8 @@
 #include <SDL.h>
 #include <SDL_image.h>
+// #include <SDL/SDL_image.h>
 #include <SDL_ttf.h>
+// #include <SDL/SDL_ttf.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -56,8 +58,8 @@ void *fn_serveur_tcp(void *arg)
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if (sockfd<0)
         {
-                printf("sockfd error\n");
-                exit(1);
+          printf("sockfd error\n");
+          exit(1);
         }
 
         bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -67,35 +69,35 @@ void *fn_serveur_tcp(void *arg)
         serv_addr.sin_port = htons(portno);
        if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
         {
-                printf("bind error\n");
-                exit(1);
+          printf("bind error\n");
+          exit(1);
         }
 
         listen(sockfd,5);
         clilen = sizeof(cli_addr);
         while (1)
         {
-                newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-                if (newsockfd < 0)
-                {
-                        printf("accept error\n");
-                        exit(1);
-                }
+            newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+            if (newsockfd < 0)
+            {
+              printf("accept error\n");
+              exit(1);
+            }
 
-                bzero(gbuffer,256);
-                n = read(newsockfd,gbuffer,255);
-                if (n < 0)
-                {
-                        printf("read error\n");
-                        exit(1);
-                }
-                //printf("%s",gbuffer);
+            bzero(gbuffer,256);
+            n = read(newsockfd,gbuffer,255);
+            if (n < 0)
+            {
+              printf("read error\n");
+              exit(1);
+            }
+            //printf("%s",gbuffer);
 
-                //pthread_mutex_lock( &mutex );
-                synchro=1;
-                //pthread_mutex_unlock( &mutex );
+            //pthread_mutex_lock( &mutex );
+            synchro=1;
+            //pthread_mutex_unlock( &mutex );
 
-                while (synchro);
+            while (synchro);  // on bloque tant que le message n'est pas traité
      }
 }
 
@@ -122,8 +124,8 @@ void sendMessageToServer(char *ipAddress, int portno, char *mess)
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
         {
-                printf("ERROR connecting\n");
-                exit(1);
+          printf("ERROR connecting\n");
+          exit(1);
         }
 
         sprintf(sendbuffer,"%s\n",mess);
@@ -146,8 +148,8 @@ int main(int argc, char ** argv)
 
         if (argc != 6)  // anciennement argc < 6
         {
-                printf("<app> <Main server ip address> <Main server port> <Client ip address> <Client port> <player name>\n");
-                exit(1);
+          printf("<app> <Main server ip address> <Main server port> <Client ip address> <Client port> <player name>\n");
+          exit(1);
         }
 
         strcpy(gServerIpAddress,argv[1]);
@@ -222,97 +224,97 @@ int main(int argc, char ** argv)
 	for (i=0;i<8;i++)
 		texture_objet[i] = SDL_CreateTextureFromSurface(renderer, objet[i]);
 
-    texture_gobutton = SDL_CreateTextureFromSurface(renderer, gobutton);
-    texture_connectbutton = SDL_CreateTextureFromSurface(renderer, connectbutton);
+  texture_gobutton = SDL_CreateTextureFromSurface(renderer, gobutton);
+  texture_connectbutton = SDL_CreateTextureFromSurface(renderer, connectbutton);
 
-    TTF_Font* Sans = TTF_OpenFont("sans.ttf", 15);
-    printf("Sans=%p\n",Sans);
+  TTF_Font* Sans = TTF_OpenFont("sans.ttf", 15);
+  printf("Sans=%p\n",Sans);
 
-   /* Creation du thread serveur tcp. */
-   printf ("Creation du thread serveur tcp !\n");
-   synchro=0;
-    // Met dans l'objet thread la fonction à accomplir et lance le thread
-   ret = pthread_create ( & thread_serveur_tcp_id, NULL, fn_serveur_tcp, NULL);
+ /* Creation du thread serveur tcp. */
+ printf ("Creation du thread serveur tcp !\n");
+ synchro=0;
+  // Met dans l'objet thread la fonction à accomplir et lance le thread
+ ret = pthread_create ( & thread_serveur_tcp_id, NULL, fn_serveur_tcp, NULL);
 
-    // boucle graphique
-    while (!quit)
-    {
-        if (SDL_PollEvent(&event))
-	      {
-          switch (event.type)
-          {
-              case SDL_QUIT:
-              		quit = 1;
-              		break;
+  // boucle graphique
+  while (!quit)
+  {
+      if (SDL_PollEvent(&event))
+      {
+        switch (event.type)
+        {
+            case SDL_QUIT:
+            		quit = 1;
+            		break;
 
-              case  SDL_MOUSEBUTTONDOWN:
-                  SDL_GetMouseState( &mx, &my );
-                  printf("mx=%d my=%d\n",mx,my);
-                  if ((mx<200) && (my<50) && (connectEnabled==1))
-                  {
-                    printf("connect button pressed\n");
-                    // Creation du message d'envoie
-                    sprintf(sendBuffer,"C %s %d %s",gClientIpAddress,gClientPort,gName);
-                    sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
-                    connectEnabled=0;
-                  }
+            case  SDL_MOUSEBUTTONDOWN:
+                SDL_GetMouseState( &mx, &my );
+                printf("mx=%d my=%d\n",mx,my);
+                if ((mx<200) && (my<50) && (connectEnabled==1))
+                {
+                  printf("connect button pressed\n");
+                  // Creation du message d'envoie
+                  sprintf(sendBuffer,"C %s %d %s",gClientIpAddress,gClientPort,gName);
+                  sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
+                  connectEnabled=0;
+                }
 
-                  else if ((mx>=0) && (mx<200) && (my>=90) && (my<330))
-                  {
-                      printf("player selected\n");
-                      joueurSel=(my-90)/60;
-                      guiltSel=-1;
-                  }
-                  else if ((mx>=200) && (mx<680) && (my>=0) && (my<90))
-                  {
-                      printf("object selected\n");
-                      objetSel=(mx-200)/60;
-                      guiltSel=-1;
-                  }
-                  else if ((mx>=100) && (mx<250) && (my>=350) && (my<740))
-                  {
-                      printf("guilty selected\n");
-                      joueurSel=-1;
-                      objetSel=-1;
-                      guiltSel=(my-350)/30;
-                  }
-                  else if ((mx>=250) && (mx<300) && (my>=350) && (my<740))
-                  {
-                      printf("cross hit\n");
-                      int ind=(my-350)/30;
-                      guiltGuess[ind]=1-guiltGuess[ind];
-                  }
-                  else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled==1))
-                  {
-                      printf("go! joueur=%d objet=%d guilt=%d\n",joueurSel, objetSel, guiltSel);
-                      if (guiltSel!=-1)
-                      {
-                        sprintf(sendBuffer,"G %d %d",gId, guiltSel);
-                        // RAJOUTER DU CODE ICI
-                      }
-                      else if ((objetSel!=-1) && (joueurSel==-1))
-                      {
-                        sprintf(sendBuffer,"O %d %d",gId, objetSel);
-                        // RAJOUTER DU CODE ICI
-                      }
-                      else if ((objetSel!=-1) && (joueurSel!=-1))
-                      {
-                        sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
-                        // RAJOUTER DU CODE ICI
-                      }
-                  }
-                  else
-                  {
-                      joueurSel=-1;
-                      objetSel=-1;
-                      guiltSel=-1;
-                  }
-                  break;
-              case  SDL_MOUSEMOTION:
-                  SDL_GetMouseState( &mx, &my );
-                  break;
-          }
-	   }
+                else if ((mx>=0) && (mx<200) && (my>=90) && (my<330))
+                {
+                    printf("player selected\n");
+                    joueurSel=(my-90)/60;
+                    guiltSel=-1;
+                }
+                else if ((mx>=200) && (mx<680) && (my>=0) && (my<90))
+                {
+                    printf("object selected\n");
+                    objetSel=(mx-200)/60;
+                    guiltSel=-1;
+                }
+                else if ((mx>=100) && (mx<250) && (my>=350) && (my<740))
+                {
+                    printf("guilty selected\n");
+                    joueurSel=-1;
+                    objetSel=-1;
+                    guiltSel=(my-350)/30;
+                }
+                else if ((mx>=250) && (mx<300) && (my>=350) && (my<740))
+                {
+                    printf("cross hit\n");
+                    int ind=(my-350)/30;
+                    guiltGuess[ind]=1-guiltGuess[ind];
+                }
+                else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled==1))
+                {
+                    printf("go! joueur=%d objet=%d guilt=%d\n",joueurSel, objetSel, guiltSel);
+                    if (guiltSel!=-1)
+                    {
+                      sprintf(sendBuffer,"G %d %d",gId, guiltSel);
+                      // RAJOUTER DU CODE ICI
+                    }
+                    else if ((objetSel!=-1) && (joueurSel==-1))
+                    {
+                      sprintf(sendBuffer,"O %d %d",gId, objetSel);
+                      // RAJOUTER DU CODE ICI
+                    }
+                    else if ((objetSel!=-1) && (joueurSel!=-1))
+                    {
+                      sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
+                      // RAJOUTER DU CODE ICI
+                    }
+                }
+                else
+                {
+                    joueurSel=-1;
+                    objetSel=-1;
+                    guiltSel=-1;
+                }
+                break;
+            case  SDL_MOUSEMOTION:
+                SDL_GetMouseState( &mx, &my );
+                break;
+        }
+      }
 
         // message reçu par le thread réseau, à traiter par la boucle graphique
         if (synchro==1)
@@ -374,82 +376,82 @@ int main(int argc, char ** argv)
 	}
 
 	{
-        SDL_Rect dstrect_pipe = { 210, 10, 40, 40 };
-        SDL_RenderCopy(renderer, texture_objet[0], NULL, &dstrect_pipe);
-        SDL_Rect dstrect_ampoule = { 270, 10, 40, 40 };
-        SDL_RenderCopy(renderer, texture_objet[1], NULL, &dstrect_ampoule);
-        SDL_Rect dstrect_poing = { 330, 10, 40, 40 };
-        SDL_RenderCopy(renderer, texture_objet[2], NULL, &dstrect_poing);
-        SDL_Rect dstrect_couronne = { 390, 10, 40, 40 };
-        SDL_RenderCopy(renderer, texture_objet[3], NULL, &dstrect_couronne);
-        SDL_Rect dstrect_carnet = { 450, 10, 40, 40 };
-        SDL_RenderCopy(renderer, texture_objet[4], NULL, &dstrect_carnet);
-        SDL_Rect dstrect_collier = { 510, 10, 40, 40 };
-        SDL_RenderCopy(renderer, texture_objet[5], NULL, &dstrect_collier);
-        SDL_Rect dstrect_oeil = { 570, 10, 40, 40 };
-        SDL_RenderCopy(renderer, texture_objet[6], NULL, &dstrect_oeil);
-        SDL_Rect dstrect_crane = { 630, 10, 40, 40 };
-        SDL_RenderCopy(renderer, texture_objet[7], NULL, &dstrect_crane);
+      SDL_Rect dstrect_pipe = { 210, 10, 40, 40 };
+      SDL_RenderCopy(renderer, texture_objet[0], NULL, &dstrect_pipe);
+      SDL_Rect dstrect_ampoule = { 270, 10, 40, 40 };
+      SDL_RenderCopy(renderer, texture_objet[1], NULL, &dstrect_ampoule);
+      SDL_Rect dstrect_poing = { 330, 10, 40, 40 };
+      SDL_RenderCopy(renderer, texture_objet[2], NULL, &dstrect_poing);
+      SDL_Rect dstrect_couronne = { 390, 10, 40, 40 };
+      SDL_RenderCopy(renderer, texture_objet[3], NULL, &dstrect_couronne);
+      SDL_Rect dstrect_carnet = { 450, 10, 40, 40 };
+      SDL_RenderCopy(renderer, texture_objet[4], NULL, &dstrect_carnet);
+      SDL_Rect dstrect_collier = { 510, 10, 40, 40 };
+      SDL_RenderCopy(renderer, texture_objet[5], NULL, &dstrect_collier);
+      SDL_Rect dstrect_oeil = { 570, 10, 40, 40 };
+      SDL_RenderCopy(renderer, texture_objet[6], NULL, &dstrect_oeil);
+      SDL_Rect dstrect_crane = { 630, 10, 40, 40 };
+      SDL_RenderCopy(renderer, texture_objet[7], NULL, &dstrect_crane);
 	}
 
         SDL_Color col1 = {0, 0, 0};
         for (i=0;i<8;i++)
         {
-                SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, nbobjets[i], col1);
-                SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+            SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, nbobjets[i], col1);
+            SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
 
-                SDL_Rect Message_rect; //create a rect
-                Message_rect.x = 230+i*60;  //controls the rect's x coordinate
-                Message_rect.y = 50; // controls the rect's y coordinte
-                Message_rect.w = surfaceMessage->w; // controls the width of the rect
-                Message_rect.h = surfaceMessage->h; // controls the height of the rect
+            SDL_Rect Message_rect; //create a rect
+            Message_rect.x = 230+i*60;  //controls the rect's x coordinate
+            Message_rect.y = 50; // controls the rect's y coordinte
+            Message_rect.w = surfaceMessage->w; // controls the width of the rect
+            Message_rect.h = surfaceMessage->h; // controls the height of the rect
 
-                SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
-                SDL_DestroyTexture(Message);
-                SDL_FreeSurface(surfaceMessage);
+            SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
+            SDL_DestroyTexture(Message);
+            SDL_FreeSurface(surfaceMessage);
         }
 
         for (i=0;i<13;i++)
         {
-                SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, nbnoms[i], col1);
-                SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+            SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, nbnoms[i], col1);
+            SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
 
-                SDL_Rect Message_rect;
-                Message_rect.x = 105;
-                Message_rect.y = 350+i*30;
-                Message_rect.w = surfaceMessage->w;
-                Message_rect.h = surfaceMessage->h;
+            SDL_Rect Message_rect;
+            Message_rect.x = 105;
+            Message_rect.y = 350+i*30;
+            Message_rect.w = surfaceMessage->w;
+            Message_rect.h = surfaceMessage->h;
 
-                SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
-                SDL_DestroyTexture(Message);
-                SDL_FreeSurface(surfaceMessage);
+            SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
+            SDL_DestroyTexture(Message);
+            SDL_FreeSurface(surfaceMessage);
         }
 
 	for (i=0;i<4;i++)
-        	for (j=0;j<8;j++)
-        	{
+    for (j=0;j<8;j++)
+    {
 			if (tableCartes[i][j]!=-1)
 			{
 				char mess[10];
 				if (tableCartes[i][j]==100)
-					sprintf(mess,"*");
+					 sprintf(mess,"*");
 				else
-					sprintf(mess,"%d",tableCartes[i][j]);
-                		SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, mess, col1);
-                		SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+					 sprintf(mess,"%d",tableCartes[i][j]);
 
-                		SDL_Rect Message_rect;
-                		Message_rect.x = 230+j*60;
-                		Message_rect.y = 110+i*60;
-                		Message_rect.w = surfaceMessage->w;
-                		Message_rect.h = surfaceMessage->h;
+    		SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, mess, col1);
+    		SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
 
-                		SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
-                		SDL_DestroyTexture(Message);
-                		SDL_FreeSurface(surfaceMessage);
+    		SDL_Rect Message_rect;
+    		Message_rect.x = 230+j*60;
+    		Message_rect.y = 110+i*60;
+    		Message_rect.w = surfaceMessage->w;
+    		Message_rect.h = surfaceMessage->h;
+
+    		SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
+    		SDL_DestroyTexture(Message);
+    		SDL_FreeSurface(surfaceMessage);
 			}
-        	}
-
+    }
 
 	// Sebastian Moran
 	{
@@ -626,11 +628,12 @@ int main(int argc, char ** argv)
 
 	for (i=0;i<14;i++)
 		SDL_RenderDrawLine(renderer, 0,350+i*30,300,350+i*30);
+
 	SDL_RenderDrawLine(renderer, 100,350,100,740);
 	SDL_RenderDrawLine(renderer, 250,350,250,740);
 	SDL_RenderDrawLine(renderer, 300,350,300,740);
 
-        //SDL_RenderCopy(renderer, texture_grille, NULL, &dstrect_grille);
+  //SDL_RenderCopy(renderer, texture_grille, NULL, &dstrect_grille);
 	if (b[0]!=-1)
 	{
         	SDL_Rect dstrect = { 750, 0, 1000/4, 660/4 };
@@ -667,22 +670,22 @@ int main(int argc, char ** argv)
 	for (i=0;i<4;i++)
 		if (strlen(gNames[i])>0)
 		{
-		SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, gNames[i], col);
-		SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+  		SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, gNames[i], col);
+  		SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
 
-		SDL_Rect Message_rect; //create a rect
-		Message_rect.x = 10;  //controls the rect's x coordinate
-		Message_rect.y = 110+i*60; // controls the rect's y coordinte
-		Message_rect.w = surfaceMessage->w; // controls the width of the rect
-		Message_rect.h = surfaceMessage->h; // controls the height of the rect
+  		SDL_Rect Message_rect; //create a rect
+  		Message_rect.x = 10;  //controls the rect's x coordinate
+  		Message_rect.y = 110+i*60; // controls the rect's y coordinte
+  		Message_rect.w = surfaceMessage->w; // controls the width of the rect
+  		Message_rect.h = surfaceMessage->h; // controls the height of the rect
 
-		SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
-    		SDL_DestroyTexture(Message);
-    		SDL_FreeSurface(surfaceMessage);
+  		SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
+  		SDL_DestroyTexture(Message);
+  		SDL_FreeSurface(surfaceMessage);
 		}
 
-        SDL_RenderPresent(renderer);
-    }
+    SDL_RenderPresent(renderer);
+  }
 
     SDL_DestroyTexture(texture_deck[0]);
     SDL_DestroyTexture(texture_deck[1]);
