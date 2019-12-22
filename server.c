@@ -17,6 +17,7 @@ struct _client
         int port;
         char name[40];
 } tcpClients[4];
+
 int nbClients;
 int fsmServer;
 int deck[13]={0,1,2,3,4,5,6,7,8,9,10,11,12};
@@ -213,18 +214,18 @@ void broadcastMessage(char *mess)
 
 int main(int argc, char *argv[])
 {
-     int sockfd, newsockfd, portno;
-     socklen_t clilen;
-     char buffer[256];
-     struct sockaddr_in serv_addr, cli_addr;
-     int n;
+    int sockfd, newsockfd, portno;
+    socklen_t clilen;
+    char buffer[256];   // stock les messages des clients
+    struct sockaddr_in serv_addr, cli_addr;
+    int n;
 	int i;
 
-        char com;
-        char clientIpAddress[256], clientName[256];
-        int clientPort;
-        int id;
-        char reply[256];
+    char com;
+    char clientIpAddress[256], clientName[256];
+    int clientPort;
+    int id;
+    char reply[256];
 
 
      if (argc < 2) {
@@ -251,18 +252,18 @@ int main(int argc, char *argv[])
 	printDeck();
 	joueurCourant=0; // premmier arrrivé premier servi
 
-	for (i=0;i<4;i++) // a quoi ça sert
+    // initialise la table des connexions client : IP/PORT/NAME
+	for (i=0;i<4;i++) 
 	{
         	strcpy(tcpClients[i].ipAddress,"localhost");
         	tcpClients[i].port=-1;
         	strcpy(tcpClients[i].name,"-");
 	}
 
-     while (1) //boucle server TCP
-     {
-     	newsockfd = accept(sockfd,
-                 (struct sockaddr *) &cli_addr,
-                 &clilen);
+    //boucle server TCP
+    while (1) 
+    {
+     	newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
      	if (newsockfd < 0)
           	error("ERROR on accept");
 
@@ -271,81 +272,77 @@ int main(int argc, char *argv[])
      	if (n < 0)
 		    error("ERROR reading from socket");
 
-      printf("Received packet from %s:%d\nData: [%s]\n\n",
+        printf("Received packet from %s:%d\nData: [%s]\n\n",
                 inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
 
         if (fsmServer==0) // machine à etat
         {
         	switch (buffer[0]) 
         	{
-                	case 'C':
-                        	sscanf(buffer,"%c %s %d %s", &com, clientIpAddress, &clientPort, clientName);
-                        	printf("COM=%c ipAddress=%s port=%d name=%s\n",com, clientIpAddress, clientPort, clientName);
+            	case 'C':
+                	sscanf(buffer,"%c %s %d %s", &com, clientIpAddress, &clientPort, clientName);
+                	printf("COM=%c ipAddress=%s port=%d name=%s\n",com, clientIpAddress, clientPort, clientName);
 
-                        	// fsmServer==0 alors j'attends les connexions de tous les joueurs
-                                strcpy(tcpClients[nbClients].ipAddress,clientIpAddress);
-                                tcpClients[nbClients].port=clientPort;
-                                strcpy(tcpClients[nbClients].name,clientName);
-                                nbClients++;
+                	// fsmServer==0 alors j'attends les connexions de tous les joueurs
+                    strcpy(tcpClients[nbClients].ipAddress,clientIpAddress);
+                    tcpClients[nbClients].port=clientPort;
+                    strcpy(tcpClients[nbClients].name,clientName);
+                    nbClients++;
 
-                                printClients();
+                    printClients();
 
-				// rechercher l'id du joueur qui vient de se connecter
+		            // rechercher l'id du joueur qui vient de se connecter
+                    id=findClientByName(clientName);
+                    printf("id=%d\n",id);
 
-                                id=findClientByName(clientName);
-                                printf("id=%d\n",id);
+		            // lui envoyer un message personnel pour lui communiquer son id
+                    sprintf(reply,"I %d",id);
+                    sendMessageToClient(tcpClients[id].ipAddress, tcpClients[id].port, reply);
 
-				// lui envoyer un message personnel pour lui communiquer son id
+    				// Envoyer un message broadcast pour communiquer a tout le monde la liste des joueurs actuellement
+     				// connectes
+                    sprintf(reply,"L %s %s %s %s", tcpClients[0].name, tcpClients[1].name, tcpClients[2].name, tcpClients[3].name);
+                    broadcastMessage(reply);
 
-                                sprintf(reply,"I %d",id);
-                                sendMessageToClient(tcpClients[id].ipAddress,
-                                       tcpClients[id].port,
-                                       reply);
+	                // Si le nombre de joueurs atteint 4, alors on peut lancer le jeu
+                    if (nbClients==4)
+			        {
+    					// On envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
 
-				// Envoyer un message broadcast pour communiquer a tout le monde la liste des joueurs actuellement
-				// connectes
+    					// On envoie ses cartes au joueur 1, ainsi que la ligne qui lui correspond dans tableCartes
 
-                                sprintf(reply,"L %s %s %s %s", tcpClients[0].name, tcpClients[1].name, tcpClients[2].name, tcpClients[3].name);
-                                broadcastMessage(reply);
+    					// On envoie ses cartes au joueur 2, ainsi que la ligne qui lui correspond dans tableCartes
 
-				// Si le nombre de joueurs atteint 4, alors on peut lancer le jeu
+    					// On envoie ses cartes au joueur 3, ainsi que la ligne qui lui correspond dans tableCartes
 
-                                if (nbClients==4)
-				{
-					// On envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
+    					// On envoie enfin un message a tout le monde pour definir qui est le joueur courant=0
 
-					// On envoie ses cartes au joueur 1, ainsi que la ligne qui lui correspond dans tableCartes
-
-					// On envoie ses cartes au joueur 2, ainsi que la ligne qui lui correspond dans tableCartes
-
-					// On envoie ses cartes au joueur 3, ainsi que la ligne qui lui correspond dans tableCartes
-
-					// On envoie enfin un message a tout le monde pour definir qui est le joueur courant=0
-
-                                        fsmServer=1;
-				}
-				break;
-                }
-	}
-	else if (fsmServer==1) // on attends des messages de 3 types
-	{
-		switch (buffer[0])
-		{
-                	case 'G': // guilty : fait des accusation
-				// RAJOUTER DU CODE ICI
-				break;
-                	case 'O': // demande des objets à tt le monde
-				// RAJOUTER DU CODE ICI
-				break;
-			case 'S': // demande des objets à une seule personne.
-				// RAJOUTER DU CODE ICI
-				break;
-                	default:
-                        	break;
-		}
+                        fsmServer=1;
+			        }
+			        break;
+            }
+	   }
+       
+        else if (fsmServer==1) // on attends des messages de 3 types
+        {
+        	switch (buffer[0])
+        	{
+                case 'G': // guilty : fait des accusation
+        			// RAJOUTER DU CODE ICI
+        			break;
+                case 'O': // demande des objets à tt le monde
+        			// RAJOUTER DU CODE ICI
+        			break;
+        		case 'S': // demande des objets à une seule personne.
+        			// RAJOUTER DU CODE ICI
+        			break;
+                default:
+                    break;
+        	}
         }
      	close(newsockfd);
      }
+
      close(sockfd);
      return 0;
 }
