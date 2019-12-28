@@ -12,6 +12,7 @@
 
 pthread_t thread_serveur_tcp_id;  // objet thread, à qui on fournit une fonction à réaliser dans le thread
 //pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+//==> g pour get, informations reçues du serveur
 char gbuffer[256];            // recepetion du message du serveur principal dans le thread reseau
 char gServerIpAddress[256];   // adresse IP du serveur principal (args ./sh13)
 int gServerPort;              // port du serveur principal (args ./sh13)
@@ -134,105 +135,105 @@ void sendMessageToServer(char *ipAddress, int portno, char *mess)
 
 int main(int argc, char ** argv)
 {
-        int ret;
-        int i,j;
+    int ret;
+    int i,j;
 
-        int quit = 0;
-        SDL_Event event;
-        int mx,my;
-        char sendBuffer[256];   // Buffer pour les messages à envoyer au serveur principal
-        char lname[256];
-        int id;
+    int quit = 0;
+    SDL_Event event;
+    int mx,my;
+    char sendBuffer[256];   // Buffer pour les messages à envoyer au serveur principal
+    char lname[256];
+    int id;
 
-        if (argc != 6)  // anciennement argc < 6
-        {
-          printf("<app> <Main server ip address> <Main server port> <Client ip address> <Client port> <player name>\n");
-          exit(1);
-        }
+    if (argc != 6)  // anciennement argc < 6
+    {
+      printf("<app> <Main server ip address> <Main server port> <Client ip address> <Client port> <player name>\n");
+      exit(1);
+    }
 
-        strcpy(gServerIpAddress,argv[1]);
-        gServerPort=atoi(argv[2]);
-        strcpy(gClientIpAddress,argv[3]);
-        gClientPort=atoi(argv[4]);
-        strcpy(gName,argv[5]);
+    strcpy(gServerIpAddress,argv[1]);
+    gServerPort=atoi(argv[2]);
+    strcpy(gClientIpAddress,argv[3]);
+    gClientPort=atoi(argv[4]);
+    strcpy(gName,argv[5]);
 
-        SDL_Init(SDL_INIT_VIDEO);
-        TTF_Init();
+    SDL_Init(SDL_INIT_VIDEO);
+    TTF_Init();
 
-        SDL_Window * window = SDL_CreateWindow("SDL2 SH13",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1024, 768, 0);
+    SDL_Window * window = SDL_CreateWindow("SDL2 SH13",
+    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1024, 768, 0);
 
-        SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
 
-        SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton;
+    SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton;
 
-	deck[0] = IMG_Load("SH13_0.png");
-	deck[1] = IMG_Load("SH13_1.png");
-	deck[2] = IMG_Load("SH13_2.png");
-	deck[3] = IMG_Load("SH13_3.png");
-	deck[4] = IMG_Load("SH13_4.png");
-	deck[5] = IMG_Load("SH13_5.png");
-	deck[6] = IMG_Load("SH13_6.png");
-	deck[7] = IMG_Load("SH13_7.png");
-	deck[8] = IMG_Load("SH13_8.png");
-	deck[9] = IMG_Load("SH13_9.png");
-	deck[10] = IMG_Load("SH13_10.png");
-	deck[11] = IMG_Load("SH13_11.png");
-	deck[12] = IMG_Load("SH13_12.png");
+  	deck[0] = IMG_Load("SH13_0.png");
+  	deck[1] = IMG_Load("SH13_1.png");
+  	deck[2] = IMG_Load("SH13_2.png");
+  	deck[3] = IMG_Load("SH13_3.png");
+  	deck[4] = IMG_Load("SH13_4.png");
+  	deck[5] = IMG_Load("SH13_5.png");
+  	deck[6] = IMG_Load("SH13_6.png");
+  	deck[7] = IMG_Load("SH13_7.png");
+  	deck[8] = IMG_Load("SH13_8.png");
+  	deck[9] = IMG_Load("SH13_9.png");
+  	deck[10] = IMG_Load("SH13_10.png");
+  	deck[11] = IMG_Load("SH13_11.png");
+  	deck[12] = IMG_Load("SH13_12.png");
 
-	objet[0] = IMG_Load("SH13_pipe_120x120.png");
-	objet[1] = IMG_Load("SH13_ampoule_120x120.png");
-	objet[2] = IMG_Load("SH13_poing_120x120.png");
-	objet[3] = IMG_Load("SH13_couronne_120x120.png");
-	objet[4] = IMG_Load("SH13_carnet_120x120.png");
-	objet[5] = IMG_Load("SH13_collier_120x120.png");
-	objet[6] = IMG_Load("SH13_oeil_120x120.png");
-	objet[7] = IMG_Load("SH13_crane_120x120.png");
+  	objet[0] = IMG_Load("SH13_pipe_120x120.png");
+  	objet[1] = IMG_Load("SH13_ampoule_120x120.png");
+  	objet[2] = IMG_Load("SH13_poing_120x120.png");
+  	objet[3] = IMG_Load("SH13_couronne_120x120.png");
+  	objet[4] = IMG_Load("SH13_carnet_120x120.png");
+  	objet[5] = IMG_Load("SH13_collier_120x120.png");
+  	objet[6] = IMG_Load("SH13_oeil_120x120.png");
+  	objet[7] = IMG_Load("SH13_crane_120x120.png");
 
-	gobutton = IMG_Load("gobutton.png");
-	connectbutton = IMG_Load("connectbutton.png");
+  	gobutton = IMG_Load("gobutton.png");
+  	connectbutton = IMG_Load("connectbutton.png");
 
-	strcpy(gNames[0],"-");
-	strcpy(gNames[1],"-");
-	strcpy(gNames[2],"-");
-	strcpy(gNames[3],"-");
+  	strcpy(gNames[0],"-");
+  	strcpy(gNames[1],"-");
+  	strcpy(gNames[2],"-");
+  	strcpy(gNames[3],"-");
 
-	joueurSel=-1;
-	objetSel=-1;
-	guiltSel=-1;
+  	joueurSel=-1;
+  	objetSel=-1;
+  	guiltSel=-1;
 
-	b[0]=-1;
-	b[1]=-1;
-	b[2]=-1;
+  	b[0]=-1;
+  	b[1]=-1;
+  	b[2]=-1;
 
-	for (i=0;i<13;i++)
-		guiltGuess[i]=0;
+  	for (i=0;i<13;i++)
+  		guiltGuess[i]=0;
 
-	for (i=0;i<4;i++)
-		for (j=0;j<8;j++)
-			tableCartes[i][j]=-1;
+  	for (i=0;i<4;i++)
+  		for (j=0;j<8;j++)
+  			tableCartes[i][j]=-1;
 
-	goEnabled=0;
-	connectEnabled=1;
+  	goEnabled=0;
+  	connectEnabled=1;
 
-  SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8];
+    SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8];
 
-	for (i=0;i<13;i++)
-		texture_deck[i] = SDL_CreateTextureFromSurface(renderer, deck[i]);
-	for (i=0;i<8;i++)
-		texture_objet[i] = SDL_CreateTextureFromSurface(renderer, objet[i]);
+  	for (i=0;i<13;i++)
+  		texture_deck[i] = SDL_CreateTextureFromSurface(renderer, deck[i]);
+  	for (i=0;i<8;i++)
+  		texture_objet[i] = SDL_CreateTextureFromSurface(renderer, objet[i]);
 
-  texture_gobutton = SDL_CreateTextureFromSurface(renderer, gobutton);
-  texture_connectbutton = SDL_CreateTextureFromSurface(renderer, connectbutton);
+    texture_gobutton = SDL_CreateTextureFromSurface(renderer, gobutton);
+    texture_connectbutton = SDL_CreateTextureFromSurface(renderer, connectbutton);
 
-  TTF_Font* Sans = TTF_OpenFont("sans.ttf", 15);
-  printf("Sans=%p\n",Sans);
+    TTF_Font* Sans = TTF_OpenFont("sans.ttf", 15);
+    printf("Sans=%p\n",Sans);
 
- /* Creation du thread serveur tcp. */
- printf ("Creation du thread serveur tcp !\n");
- synchro=0;
-  // Met dans l'objet thread la fonction à accomplir et lance le thread
- ret = pthread_create ( & thread_serveur_tcp_id, NULL, fn_serveur_tcp, NULL);
+   /* Creation du thread serveur tcp. */
+   printf ("Creation du thread serveur tcp !\n");
+   synchro=0;
+    // Met dans l'objet thread la fonction à accomplir et lance le thread
+   ret = pthread_create ( & thread_serveur_tcp_id, NULL, fn_serveur_tcp, NULL);
 
   // boucle graphique
   while (!quit)
@@ -300,6 +301,7 @@ int main(int argc, char ** argv)
                       sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
                       // RAJOUTER DU CODE ICI
                     }
+                    printf("sendBuffer : %s\n", sendBuffer);
                 }
                 else
                 {
@@ -330,13 +332,14 @@ int main(int argc, char ** argv)
                     sscanf(gbuffer + 1, "%s %s %s %s", gNames[0], gNames[1], gNames[2], gNames[3]);
                     break;
                 case 'D': // le joueur recoit ses trois cartes
-                    // sscanf(gbuffer, "%d %d %d", b[0],b[1],b[2]);
+                    // D 1 2 3
+                    sscanf(gbuffer + 1, "%d %d %d", b[0],b[1],b[2]);
                     break;
-                // Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go
+                // Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go ==> je ne comprend pas (thomas)
                 case 'M': // le joueur recoit le n° du joueur courant
                     // RAJOUTER DU CODE ICI
                     break;
-                case 'V':   // le joueur recoit une valeur de tableCartes
+                case 'V':   // le joueur recoit une valeur de tableCartes ==> ou stocker cette valeur? à quoi sert-elle? (thomas)
                     // RAJOUTER DU CODE ICI
                     break;
             }

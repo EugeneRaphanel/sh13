@@ -13,14 +13,14 @@
 
 struct _client
 {
-        char ipAddress[40];
-        int port;
-        char name[40];
+    char ipAddress[40];
+    int port;
+    char name[40];
 } tcpClients[4];
 
 int nbClients;
 int fsmServer;
-int deck[13]={0,1,2,3,4,5,6,7,8,9,10,11,12};
+int deck[13]={0,1,2,3,4,5,6,7,8,9,10,11,12};  // cartes personnages à distribuer
 int tableCartes[4][8]; // nb joueurs nb symboles
 char *nomcartes[]=
 {"Sebastian Moran", "irene Adler", "inspector Lestrade",
@@ -37,18 +37,18 @@ void error(const char *msg)
 
 void melangerDeck()
 {
-        int i;
-        int index1,index2,tmp;
+    int i;
+    int index1,index2,tmp;
 
-        for (i=0;i<1000;i++)
-        {
-                index1=rand()%13;
-                index2=rand()%13;
+    for (i=0;i<1000;i++)
+    {
+        index1=rand()%13;
+        index2=rand()%13;
 
-                tmp=deck[index1];
-                deck[index1]=deck[index2];
-                deck[index2]=tmp;
-        }
+        tmp=deck[index1];
+        deck[index1]=deck[index2];
+        deck[index2]=tmp;
+    }
 }
 
 void createTable()
@@ -152,12 +152,12 @@ void printDeck()
 
 void printClients()
 {
-        int i;
+    int i;
 
-        for (i=0;i<nbClients;i++)
-          printf("%d: %s %5.5d %s\n",i,tcpClients[i].ipAddress,
-            tcpClients[i].port,
-            tcpClients[i].name);
+    for (i=0;i<nbClients;i++)
+      printf("%d: %s %5.5d %s\n",i,tcpClients[i].ipAddress,
+        tcpClients[i].port,
+        tcpClients[i].name);
 }
 
 int findClientByName(char *name) // trouve le numéro du client dans la table
@@ -170,7 +170,7 @@ int findClientByName(char *name) // trouve le numéro du client dans la table
         return -1;
 }
 
-void sendMessageToClient(char *clientip,int clientport,char *mess)
+void sendMessageToClient(char *clientip, int clientport,char *mess)
 {
     int sockfd, portno, n;
     struct sockaddr_in serv_addr;
@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
 	melangerDeck();
 	createTable();
 	printDeck();
-	joueurCourant=0; // premmier arrrivé premier servi
+	joueurCourant=0; // premier arrrivé premier servi
 
     // initialise la table des connexions client : IP/PORT/NAME
 	for (i=0;i<4;i++) 
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
         	strcpy(tcpClients[i].name,"-");
 	}
 
-    //boucle server TCP
+    // boucle serveur TCP
     while (1) 
     {
      	newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
@@ -307,14 +307,28 @@ int main(int argc, char *argv[])
                 // Si le nombre de joueurs atteint 4, alors on peut lancer le jeu
                 if (nbClients==4)
 		            {
+                  // code thomas
+                  // pas sûr pour V 
         					// On envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
-
+                  sprintf(reply, "D %d %d %d", deck[0], deck[1], deck[2]);
+                  sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);
+                  sprintf(reply, "V %d", 0);
+                  sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);
         					// On envoie ses cartes au joueur 1, ainsi que la ligne qui lui correspond dans tableCartes
-
+                  sprintf(reply, "D %d %d %d", deck[3], deck[4], deck[5]);
+                  sendMessageToClient(tcpClients[1].ipAddress, tcpClients[1].port, reply);
+                  sprintf(reply, "V %d", 1);
+                  sendMessageToClient(tcpClients[1].ipAddress, tcpClients[1].port, reply);
         					// On envoie ses cartes au joueur 2, ainsi que la ligne qui lui correspond dans tableCartes
-
+                  sprintf(reply, "D %d %d %d", deck[6], deck[7], deck[8]);
+                  sendMessageToClient(tcpClients[2].ipAddress, tcpClients[2].port, reply);
+                  sprintf(reply, "V %d", 2);
+                  sendMessageToClient(tcpClients[2].ipAddress, tcpClients[2].port, reply);
         					// On envoie ses cartes au joueur 3, ainsi que la ligne qui lui correspond dans tableCartes
-
+                  sprintf(reply, "D %d %d %d", deck[9], deck[10], deck[11]);
+                  sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);
+                  sprintf(reply, "V %d", 3);
+                  sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);
         					// On envoie enfin un message a tout le monde pour definir qui est le joueur courant=0
                   fsmServer=1;
 		            }
