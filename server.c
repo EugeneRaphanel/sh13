@@ -137,10 +137,10 @@ void createTable()
 
 void printDeck()
 {
-        int i,j;
+  int i,j;
 
-        for (i=0;i<13;i++)
-                printf("%d %s\n",deck[i],nomcartes[deck[i]]);
+  for (i=0;i<13;i++)
+          printf("%d %s\n",deck[i],nomcartes[deck[i]]);
 
 	for (i=0;i<4;i++)
 	{
@@ -155,9 +155,9 @@ void printClients()
         int i;
 
         for (i=0;i<nbClients;i++)
-                printf("%d: %s %5.5d %s\n",i,tcpClients[i].ipAddress,
-                        tcpClients[i].port,
-                        tcpClients[i].name);
+          printf("%d: %s %5.5d %s\n",i,tcpClients[i].ipAddress,
+            tcpClients[i].port,
+            tcpClients[i].name);
 }
 
 int findClientByName(char *name) // trouve le numéro du client dans la table
@@ -204,12 +204,10 @@ void sendMessageToClient(char *clientip,int clientport,char *mess)
 
 void broadcastMessage(char *mess)
 {
-        int i;
+    int i;
 
-        for (i=0;i<nbClients;i++)
-                sendMessageToClient(tcpClients[i].ipAddress,
-                        tcpClients[i].port,
-                        mess);
+    for (i=0;i<nbClients;i++)
+            sendMessageToClient(tcpClients[i].ipAddress, tcpClients[i].port, mess);
 }
 
 int main(int argc, char *argv[])
@@ -219,7 +217,7 @@ int main(int argc, char *argv[])
     char buffer[256];   // stock les messages des clients
     struct sockaddr_in serv_addr, cli_addr;
     int n;
-	int i;
+	  int i;
 
     char com;
     char clientIpAddress[256], clientName[256];
@@ -243,7 +241,7 @@ int main(int argc, char *argv[])
      if (bind(sockfd, (struct sockaddr *) &serv_addr,
               sizeof(serv_addr)) < 0) // dis tout ce qui viens sur mon port, c'est mon port
               error("ERROR on binding");
-     listen(sockfd,5);// ouverute et début de l'écoute pour receptionner les messages
+     listen(sockfd,5);// ouverture et début de l'écoute pour receptionner les messages
      clilen = sizeof(cli_addr);
 
 	printDeck();
@@ -275,55 +273,56 @@ int main(int argc, char *argv[])
         printf("Received packet from %s:%d\nData: [%s]\n\n",
                 inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
 
-        if (fsmServer==0) // machine à etat
+        // machine à etat
+        // 0 => le jeu n'a pas encore commencé 
+        if (fsmServer==0) 
         {
         	switch (buffer[0]) 
         	{
             	case 'C':
-                	sscanf(buffer,"%c %s %d %s", &com, clientIpAddress, &clientPort, clientName);
-                	printf("COM=%c ipAddress=%s port=%d name=%s\n",com, clientIpAddress, clientPort, clientName);
+              	sscanf(buffer,"%c %s %d %s", &com, clientIpAddress, &clientPort, clientName);
+              	printf("COM=%c ipAddress=%s port=%d name=%s\n",com, clientIpAddress, clientPort, clientName);
 
-                	// fsmServer==0 alors j'attends les connexions de tous les joueurs
-                    strcpy(tcpClients[nbClients].ipAddress,clientIpAddress);
-                    tcpClients[nbClients].port=clientPort;
-                    strcpy(tcpClients[nbClients].name,clientName);
-                    nbClients++;
+            	   // fsmServer==0 alors j'attends les connexions de tous les joueurs
+                strcpy(tcpClients[nbClients].ipAddress,clientIpAddress);
+                tcpClients[nbClients].port=clientPort;
+                strcpy(tcpClients[nbClients].name,clientName);
+                nbClients++;
 
-                    printClients();
+                printClients();
 
-		            // rechercher l'id du joueur qui vient de se connecter
-                    id=findClientByName(clientName);
-                    printf("id=%d\n",id);
+                // rechercher l'id du joueur qui vient de se connecter
+                id=findClientByName(clientName);
+                printf("id=%d\n",id);
 
-		            // lui envoyer un message personnel pour lui communiquer son id
-                    sprintf(reply,"I %d",id);
-                    sendMessageToClient(tcpClients[id].ipAddress, tcpClients[id].port, reply);
+                // lui envoyer un message personnel pour lui communiquer son id
+                sprintf(reply,"I %d",id);
+                sendMessageToClient(tcpClients[id].ipAddress, tcpClients[id].port, reply);
 
-    				// Envoyer un message broadcast pour communiquer a tout le monde la liste des joueurs actuellement
-     				// connectes
-                    sprintf(reply,"L %s %s %s %s", tcpClients[0].name, tcpClients[1].name, tcpClients[2].name, tcpClients[3].name);
-                    broadcastMessage(reply);
+        				// Envoyer un message broadcast pour communiquer a tout le monde la liste des joueurs actuellement
+         				// connectes
+                sprintf(reply,"L %s %s %s %s", tcpClients[0].name, tcpClients[1].name, tcpClients[2].name, tcpClients[3].name);
+                broadcastMessage(reply);
 
-	                // Si le nombre de joueurs atteint 4, alors on peut lancer le jeu
-                    if (nbClients==4)
-			        {
-    					// On envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
+                // Si le nombre de joueurs atteint 4, alors on peut lancer le jeu
+                if (nbClients==4)
+		            {
+        					// On envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
 
-    					// On envoie ses cartes au joueur 1, ainsi que la ligne qui lui correspond dans tableCartes
+        					// On envoie ses cartes au joueur 1, ainsi que la ligne qui lui correspond dans tableCartes
 
-    					// On envoie ses cartes au joueur 2, ainsi que la ligne qui lui correspond dans tableCartes
+        					// On envoie ses cartes au joueur 2, ainsi que la ligne qui lui correspond dans tableCartes
 
-    					// On envoie ses cartes au joueur 3, ainsi que la ligne qui lui correspond dans tableCartes
+        					// On envoie ses cartes au joueur 3, ainsi que la ligne qui lui correspond dans tableCartes
 
-    					// On envoie enfin un message a tout le monde pour definir qui est le joueur courant=0
-
-                        fsmServer=1;
-			        }
-			        break;
-            }
-	   }
-       
-        else if (fsmServer==1) // on attends des messages de 3 types
+        					// On envoie enfin un message a tout le monde pour definir qui est le joueur courant=0
+                  fsmServer=1;
+		            }
+		            break;
+          }
+	     }
+        // le jeu se déroule, on attends des messages de 3 types de la part des joueurs
+        else if (fsmServer==1)
         {
         	switch (buffer[0])
         	{
