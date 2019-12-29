@@ -374,7 +374,7 @@ int main(int argc, char *argv[])
                 		break;
         		    case 'S': // demande des objets à une seule personne.
               			sscanf(buffer,"S %d %d %d", &idJoueur, &playerAsked, &objectAsked);
-                    //sprintf(reply, "V? %d", tableCartes[playerAsked][objectAsked]); // => problème avec le format de V
+                    sprintf(reply, "V %d %d %d", playerAsked, objectAsked, tableCartes[playerAsked][objectAsked]);
                     sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
               			break;
                 default:
