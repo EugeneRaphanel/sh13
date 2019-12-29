@@ -290,21 +290,18 @@ int main(int argc, char ** argv)
                     {
                       sprintf(sendBuffer,"G %d %d",gId, guiltSel);
                       sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer); 
-                      goEnabled = 0;
                       // autre chose?
                     }
                     else if ((objetSel!=-1) && (joueurSel==-1))
                     {
                       sprintf(sendBuffer,"O %d %d",gId, objetSel);
                       sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
-                      goEnabled = 0;
                       // autre chose?
                     }
                     else if ((objetSel!=-1) && (joueurSel!=-1))
                     {
                       sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
                       sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer); 
-                      goEnabled = 0;
                       // autre chose?
                     }
                     printf("sendBuffer : %s\n", sendBuffer);
@@ -345,7 +342,9 @@ int main(int argc, char ** argv)
               case 'M': // le joueur recoit le n° du joueur courant, et joue si il est désigné (goEnabled = 1 => bouton go dispo)
                   sscanf(gbuffer + 1, "%d", &joueurCourant);
                   if (gId == joueurCourant) 
-                      goEnabled = 1;
+                    goEnabled = 1;
+                  else 
+                    goEnabled = 0;
                   break;
               case 'V':   // le joueur initialise sa tableCarte avec ses propres symboles
                   // V 0 1 2 3 4 5 6 7

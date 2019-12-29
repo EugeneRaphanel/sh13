@@ -359,19 +359,12 @@ int main(int argc, char *argv[])
                     printf("pour gagner : %d\n", deck[12]);
                     if (guiltyGuessed == deck[12]) {
                       printf("you won !\n");
-                      // ajouter du code
+                      // end game
                     }
                     else {
                       printf("you lossed !\n");
                       // ajouter du code
                     }
-                    if (joueurCourant == 3) 
-                      joueurCourant = 0;
-                    else 
-                      joueurCourant++; 
-
-                    sprintf(reply, "M %d", joueurCourant);
-                    broadcastMessage(reply);
                     break;
                 case 'O': // demande des objets à tt le monde
                 		// RAJOUTER DU CODE ICI
@@ -382,6 +375,13 @@ int main(int argc, char *argv[])
                 default:
                     break;
         	}
+          // désigne le prochain joueur
+          if (joueurCourant == 3) 
+            joueurCourant = 0;
+          else 
+            joueurCourant++; 
+          sprintf(reply, "M %d", joueurCourant);
+          broadcastMessage(reply);
         }
      	close(newsockfd);
      }
