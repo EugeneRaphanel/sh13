@@ -20,12 +20,12 @@ char gClientIpAddress[256];   // adresse IP du thread réseau du client (args ./
 int gClientPort;              // port du thread réseau client (args ./sh13)
 char gName[256];              // nom du joueur spécifié en argument (args ./sh13)
 char gNames[4][256];          // noms des joueurs connectés (envoyé par le serveur)
-int gId;
+int gId;                      // Id du joueur ==> utile pour connaître sa position dans tableCarte par exemple
 int joueurSel;                // joueur selectionné par la souris
 int objetSel;                 // objet selectionné par la souris
 int guiltSel;                 // coupable selectionné par la souris
 int guiltGuess[13];
-int tableCartes[4][8];
+int tableCartes[4][8];        // le joueur essaie d'obtenir le plus d'info possibles sur les symboles des autres joueurs (il veut se rapprocher de server::tableCarte)
 int b[3];                     // cartes joueurs
 int goEnabled;                // quand ==1 et que 4 joueurs sont disponibles, fait apparaitre un bouton lançant la partie
 int connectEnabled;           // quand ==1, fait apparaitre un bouton qui permet de se connecter au serveur
@@ -325,7 +325,8 @@ int main(int argc, char ** argv)
             {
                 case 'I': // le joueur recoit son Id
                     // I 1
-                    sscanf(gbuffer, "%d", &gId);
+                    sscanf(gbuffer + 1, "%d", &gId);
+                    printf("DEBUG Id : %d\n", gId);
                     break;
                 case 'L': // le joueur recoit la liste des joueurs
                     // L Elyoth _ _ _
@@ -334,14 +335,16 @@ int main(int argc, char ** argv)
                 case 'D': // le joueur recoit ses trois cartes
                     // D 1 2 3
                     sscanf(gbuffer + 1, "%d %d %d", &b[0], &b[1], &b[2]);
-                    printf("cartes : %d %d %d\n", b[0], b[1], b[2]);
                     break;
                 // Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go ==> je ne comprend pas (thomas)
                 case 'M': // le joueur recoit le n° du joueur courant
                     // RAJOUTER DU CODE ICI
                     break;
-                case 'V':   // le joueur recoit une valeur de tableCartes ==> ou stocker cette valeur? à quoi sert-elle? (thomas)
-                    // RAJOUTER DU CODE ICI
+                case 'V':   // le joueur initialise sa tableCarte avec ses propres symboles
+                    // V 0 1 2 3 4 5 6 7
+                    sscanf(gbuffer + 1, "%d %d %d %d %d %d %d %d", &tableCartes[gId][0], &tableCartes[gId][1], &tableCartes[gId][2], &tableCartes[gId][3], 
+                                                                   &tableCartes[gId][4], &tableCartes[gId][5], &tableCartes[gId][6], &tableCartes[gId][7]);
+
                     break;
             }
             synchro=0;
