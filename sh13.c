@@ -27,7 +27,7 @@ int guiltSel;                 // coupable selectionné par la souris
 int guiltGuess[13];
 int tableCartes[4][8];        // le joueur essaie d'obtenir le plus d'info possibles sur les symboles des autres joueurs (il veut se rapprocher de server::tableCarte)
 int b[3];                     // cartes joueurs
-int goEnabled;                // quand ==1 et que 4 joueurs sont disponibles, fait apparaitre un bouton lançant la partie
+int goEnabled;                // apparait sur l'écran d'un joueur quand il peut joueur
 int connectEnabled;           // quand ==1, fait apparaitre un bouton qui permet de se connecter au serveur
 
 char *nbobjets[]={"5","5","5","5","4","3","3","3"};
@@ -39,8 +39,8 @@ char *nbnoms[]={"Sebastian Moran", "irene Adler", "inspector Lestrade",
 /*
     volatile car modifié par le thread reseau et par le processus de base (main)
     Il peut donc y avoir un conflit entre les deux contextes d'execution de ces deux fils
-    On ira donc chercher la vrai valeur de synchro à chaque fois, donc dans la RAM, et non dans le cache qui contient les piles
-    mis à 1 par le thread reseau quand il recoit un message
+    On ira donc chercher la vrai valeur de synchro à chaque fois, donc dans la RAM, et non dans le cache qui contient les piles.
+    Mis à 1 par le thread reseau quand il recoit un message
     tant qu'il n'est pas remis à 0 par la boucle graphique, on ne receptionne pas de nouveau message (thread bloqué)
     mis à 0 par la boucle graphique quand elle traite le message receptionner par le thread reseau
 */
@@ -283,23 +283,29 @@ int main(int argc, char ** argv)
                     int ind=(my-350)/30;
                     guiltGuess[ind]=1-guiltGuess[ind];
                 }
-                else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled==1))
+                else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled==1))  // on clic sur le bouton go
                 {
                     printf("go! joueur=%d objet=%d guilt=%d\n",joueurSel, objetSel, guiltSel);
                     if (guiltSel!=-1)
                     {
                       sprintf(sendBuffer,"G %d %d",gId, guiltSel);
-                      // RAJOUTER DU CODE ICI
+                      sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer); 
+                      goEnabled = 0;
+                      // autre chose?
                     }
                     else if ((objetSel!=-1) && (joueurSel==-1))
                     {
                       sprintf(sendBuffer,"O %d %d",gId, objetSel);
-                      // RAJOUTER DU CODE ICI
+                      sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
+                      goEnabled = 0;
+                      // autre chose?
                     }
                     else if ((objetSel!=-1) && (joueurSel!=-1))
                     {
                       sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
-                      // RAJOUTER DU CODE ICI
+                      sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer); 
+                      goEnabled = 0;
+                      // autre chose?
                     }
                     printf("sendBuffer : %s\n", sendBuffer);
                 }
@@ -320,8 +326,7 @@ int main(int argc, char ** argv)
         if (synchro==1)
         {
           // pthread_mutex_lock( &mutex );
-
-          int joueurCourant;  // Id du joueur courant        
+          int joueurCourant;  // Id du joueur courant
           printf("consomme |%s|\n",gbuffer);
           switch (gbuffer[0])
           {
@@ -356,49 +361,49 @@ int main(int argc, char ** argv)
         SDL_Rect dstrect_image = { 0, 0, 500, 330 };
         SDL_Rect dstrect_image1 = { 0, 340, 250, 330/2 };
 
-	SDL_SetRenderDrawColor(renderer, 255, 230, 230, 230);
-	SDL_Rect rect = {0, 0, 1024, 768};
-	SDL_RenderFillRect(renderer, &rect);
+        SDL_SetRenderDrawColor(renderer, 255, 230, 230, 230);
+        SDL_Rect rect = {0, 0, 1024, 768};
+        SDL_RenderFillRect(renderer, &rect);
 
-	if (joueurSel!=-1)
-	{
-		SDL_SetRenderDrawColor(renderer, 255, 180, 180, 255);
-		SDL_Rect rect1 = {0, 90+joueurSel*60, 200 , 60};
-		SDL_RenderFillRect(renderer, &rect1);
-	}
+        if (joueurSel!=-1)
+        {
+        	SDL_SetRenderDrawColor(renderer, 255, 180, 180, 255);
+        	SDL_Rect rect1 = {0, 90+joueurSel*60, 200 , 60};
+        	SDL_RenderFillRect(renderer, &rect1);
+        }
 
-	if (objetSel!=-1)
-	{
-		SDL_SetRenderDrawColor(renderer, 180, 255, 180, 255);
-		SDL_Rect rect1 = {200+objetSel*60, 0, 60 , 90};
-		SDL_RenderFillRect(renderer, &rect1);
-	}
+        if (objetSel!=-1)
+        {
+        	SDL_SetRenderDrawColor(renderer, 180, 255, 180, 255);
+        	SDL_Rect rect1 = {200+objetSel*60, 0, 60 , 90};
+        	SDL_RenderFillRect(renderer, &rect1);
+        }
 
-	if (guiltSel!=-1)
-	{
-		SDL_SetRenderDrawColor(renderer, 180, 180, 255, 255);
-		SDL_Rect rect1 = {100, 350+guiltSel*30, 150 , 30};
-		SDL_RenderFillRect(renderer, &rect1);
-	}
+        if (guiltSel!=-1)
+        {
+        	SDL_SetRenderDrawColor(renderer, 180, 180, 255, 255);
+        	SDL_Rect rect1 = {100, 350+guiltSel*30, 150 , 30};
+        	SDL_RenderFillRect(renderer, &rect1);
+        }
 
-	{
-      SDL_Rect dstrect_pipe = { 210, 10, 40, 40 };
-      SDL_RenderCopy(renderer, texture_objet[0], NULL, &dstrect_pipe);
-      SDL_Rect dstrect_ampoule = { 270, 10, 40, 40 };
-      SDL_RenderCopy(renderer, texture_objet[1], NULL, &dstrect_ampoule);
-      SDL_Rect dstrect_poing = { 330, 10, 40, 40 };
-      SDL_RenderCopy(renderer, texture_objet[2], NULL, &dstrect_poing);
-      SDL_Rect dstrect_couronne = { 390, 10, 40, 40 };
-      SDL_RenderCopy(renderer, texture_objet[3], NULL, &dstrect_couronne);
-      SDL_Rect dstrect_carnet = { 450, 10, 40, 40 };
-      SDL_RenderCopy(renderer, texture_objet[4], NULL, &dstrect_carnet);
-      SDL_Rect dstrect_collier = { 510, 10, 40, 40 };
-      SDL_RenderCopy(renderer, texture_objet[5], NULL, &dstrect_collier);
-      SDL_Rect dstrect_oeil = { 570, 10, 40, 40 };
-      SDL_RenderCopy(renderer, texture_objet[6], NULL, &dstrect_oeil);
-      SDL_Rect dstrect_crane = { 630, 10, 40, 40 };
-      SDL_RenderCopy(renderer, texture_objet[7], NULL, &dstrect_crane);
-	}
+  	{
+        SDL_Rect dstrect_pipe = { 210, 10, 40, 40 };
+        SDL_RenderCopy(renderer, texture_objet[0], NULL, &dstrect_pipe);
+        SDL_Rect dstrect_ampoule = { 270, 10, 40, 40 };
+        SDL_RenderCopy(renderer, texture_objet[1], NULL, &dstrect_ampoule);
+        SDL_Rect dstrect_poing = { 330, 10, 40, 40 };
+        SDL_RenderCopy(renderer, texture_objet[2], NULL, &dstrect_poing);
+        SDL_Rect dstrect_couronne = { 390, 10, 40, 40 };
+        SDL_RenderCopy(renderer, texture_objet[3], NULL, &dstrect_couronne);
+        SDL_Rect dstrect_carnet = { 450, 10, 40, 40 };
+        SDL_RenderCopy(renderer, texture_objet[4], NULL, &dstrect_carnet);
+        SDL_Rect dstrect_collier = { 510, 10, 40, 40 };
+        SDL_RenderCopy(renderer, texture_objet[5], NULL, &dstrect_collier);
+        SDL_Rect dstrect_oeil = { 570, 10, 40, 40 };
+        SDL_RenderCopy(renderer, texture_objet[6], NULL, &dstrect_oeil);
+        SDL_Rect dstrect_crane = { 630, 10, 40, 40 };
+        SDL_RenderCopy(renderer, texture_objet[7], NULL, &dstrect_crane);
+  	}
 
         SDL_Color col1 = {0, 0, 0};
         for (i=0;i<8;i++)

@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
                   sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);
 
         					// On envoie enfin un message a tout le monde pour definir qui est le joueur courant=0
-                  sprintf(reply, "M %d", 0);
+                  sprintf(reply, "M %d", joueurCourant);
                   broadcastMessage(reply);
                   fsmServer=1;
 		            }
@@ -353,14 +353,16 @@ int main(int argc, char *argv[])
         	switch (buffer[0])
         	{
                 case 'G': // guilty : fait des accusation
-        			// RAJOUTER DU CODE ICI
-        			break;
+                    // sscanf(buffer,"G %d %d", ? , ?);
+                    // envoyer qq chose en rapport ?
+                    // envoyer le nouveau joueur courant
+                    break;
                 case 'O': // demande des objets à tt le monde
-        			// RAJOUTER DU CODE ICI
-        			break;
-        		case 'S': // demande des objets à une seule personne.
-        			// RAJOUTER DU CODE ICI
-        			break;
+                		// RAJOUTER DU CODE ICI
+                		break;
+        		    case 'S': // demande des objets à une seule personne.
+              			// RAJOUTER DU CODE ICI
+              			break;
                 default:
                     break;
         	}
