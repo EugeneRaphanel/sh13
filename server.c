@@ -21,7 +21,9 @@ struct _client
 int nbClients;
 int fsmServer;
 int deck[13]={0,1,2,3,4,5,6,7,8,9,10,11,12};  // cartes personnages à distribuer
-int tableCartes[4][8]; // nb joueurs nb symboles
+// combien de symbole possède chaque joueur, il y a 8 symboles en tout
+// tableCarte[0][7] = 2 => le joueur 0 possède 2 cranes (7 = crane)
+int tableCartes[4][8];
 char *nomcartes[]=
 {"Sebastian Moran", "irene Adler", "inspector Lestrade",
   "inspector Gregson", "inspector Baynes", "inspector Bradstreet",
@@ -68,6 +70,7 @@ void createTable()
 	{
 		for (j=0;j<3;j++)
 		{
+      // on parcours les 3 cartes de chaque joueur
 			c=deck[i*3+j];
 			switch (c)
 			{

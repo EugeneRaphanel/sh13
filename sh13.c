@@ -333,7 +333,8 @@ int main(int argc, char ** argv)
                     break;
                 case 'D': // le joueur recoit ses trois cartes
                     // D 1 2 3
-                    sscanf(gbuffer + 1, "%d %d %d", b[0],b[1],b[2]);
+                    sscanf(gbuffer + 1, "%d %d %d", &b[0], &b[1], &b[2]);
+                    printf("cartes : %d %d %d\n", b[0], b[1], b[2]);
                     break;
                 // Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go ==> je ne comprend pas (thomas)
                 case 'M': // le joueur recoit le n° du joueur courant
