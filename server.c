@@ -276,6 +276,8 @@ int main(int argc, char *argv[])
         printf("Received packet from %s:%d\nData: [%s]\n\n",
                 inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
 
+        int idJoueur, guiltyGuessed;  // utilisées pour stocker les messages des clients
+
         // machine à etat
         // 0 => le jeu n'a pas encore commencé 
         if (fsmServer==0) 
@@ -353,9 +355,23 @@ int main(int argc, char *argv[])
         	switch (buffer[0])
         	{
                 case 'G': // guilty : fait des accusation
-                    // sscanf(buffer,"G %d %d", ? , ?);
-                    // envoyer qq chose en rapport ?
-                    // envoyer le nouveau joueur courant
+                    sscanf(buffer,"G %d %d", &idJoueur, &guiltyGuessed);
+                    printf("pour gagner : %d\n", deck[12]);
+                    if (guiltyGuessed == deck[12]) {
+                      printf("you won !\n");
+                      // ajouter du code
+                    }
+                    else {
+                      printf("you lossed !\n");
+                      // ajouter du code
+                    }
+                    if (joueurCourant == 3) 
+                      joueurCourant = 0;
+                    else 
+                      joueurCourant++; 
+
+                    sprintf(reply, "M %d", joueurCourant);
+                    broadcastMessage(reply);
                     break;
                 case 'O': // demande des objets à tt le monde
                 		// RAJOUTER DU CODE ICI
