@@ -300,7 +300,7 @@ int main(int argc, char ** argv)
                     }
                     else if ((objetSel!=-1) && (joueurSel!=-1))
                     {
-                      sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
+                      sprintf(sendBuffer,"S %d %d %d",gId, joueurSel, objetSel);
                       sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer); 
                       // autre chose?
                     }
@@ -324,6 +324,7 @@ int main(int argc, char ** argv)
         {
           // pthread_mutex_lock( &mutex );
           int joueurCourant;  // Id du joueur courant
+          int i, j, val; // coordonnées tableCarte lors de la reception d'un message V
           printf("consomme |%s|\n",gbuffer);
           switch (gbuffer[0])
           {
@@ -346,10 +347,10 @@ int main(int argc, char ** argv)
                   else 
                     goEnabled = 0;
                   break;
-              case 'V':   // le joueur initialise sa tableCarte avec ses propres symboles
-                  // V 0 1 2 3 4 5 6 7
-                  sscanf(gbuffer + 1, "%d %d %d %d %d %d %d %d", &tableCartes[gId][0], &tableCartes[gId][1], &tableCartes[gId][2], &tableCartes[gId][3], 
-                                                                 &tableCartes[gId][4], &tableCartes[gId][5], &tableCartes[gId][6], &tableCartes[gId][7]);
+              case 'V':   // le joueur reçoit une valeur de table carte
+                  // V i j tableCarte[i][j]
+                  sscanf(gbuffer + 1, "%d %d %d", &i, &j, &val);
+                  tableCartes[i][j] = val;
                   break;
             }
             synchro=0;
