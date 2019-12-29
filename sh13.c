@@ -319,33 +319,34 @@ int main(int argc, char ** argv)
         // message reçu par le thread réseau, à traiter par la boucle graphique
         if (synchro==1)
         {
-            // pthread_mutex_lock( &mutex );
-            printf("consomme |%s|\n",gbuffer);
-            switch (gbuffer[0])
-            {
-                case 'I': // le joueur recoit son Id
-                    // I 1
-                    sscanf(gbuffer + 1, "%d", &gId);
-                    printf("DEBUG Id : %d\n", gId);
-                    break;
-                case 'L': // le joueur recoit la liste des joueurs
-                    // L Elyoth _ _ _
-                    sscanf(gbuffer + 1, "%s %s %s %s", gNames[0], gNames[1], gNames[2], gNames[3]);
-                    break;
-                case 'D': // le joueur recoit ses trois cartes
-                    // D 1 2 3
-                    sscanf(gbuffer + 1, "%d %d %d", &b[0], &b[1], &b[2]);
-                    break;
-                // Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go ==> je ne comprend pas (thomas)
-                case 'M': // le joueur recoit le n° du joueur courant
-                    // RAJOUTER DU CODE ICI
-                    break;
-                case 'V':   // le joueur initialise sa tableCarte avec ses propres symboles
-                    // V 0 1 2 3 4 5 6 7
-                    sscanf(gbuffer + 1, "%d %d %d %d %d %d %d %d", &tableCartes[gId][0], &tableCartes[gId][1], &tableCartes[gId][2], &tableCartes[gId][3], 
-                                                                   &tableCartes[gId][4], &tableCartes[gId][5], &tableCartes[gId][6], &tableCartes[gId][7]);
+          // pthread_mutex_lock( &mutex );
 
-                    break;
+          int joueurCourant;  // Id du joueur courant        
+          printf("consomme |%s|\n",gbuffer);
+          switch (gbuffer[0])
+          {
+              case 'I': // le joueur recoit son Id
+                  // I 1
+                  sscanf(gbuffer + 1, "%d", &gId);
+                  break;
+              case 'L': // le joueur recoit la liste des joueurs
+                  // L Elyoth _ _ _
+                  sscanf(gbuffer + 1, "%s %s %s %s", gNames[0], gNames[1], gNames[2], gNames[3]);
+                  break;
+              case 'D': // le joueur recoit ses trois cartes
+                  // D 1 2 3
+                  sscanf(gbuffer + 1, "%d %d %d", &b[0], &b[1], &b[2]);
+                  break;
+              case 'M': // le joueur recoit le n° du joueur courant, et joue si il est désigné (goEnabled = 1 => bouton go dispo)
+                  sscanf(gbuffer + 1, "%d", &joueurCourant);
+                  if (gId == joueurCourant) 
+                      goEnabled = 1;
+                  break;
+              case 'V':   // le joueur initialise sa tableCarte avec ses propres symboles
+                  // V 0 1 2 3 4 5 6 7
+                  sscanf(gbuffer + 1, "%d %d %d %d %d %d %d %d", &tableCartes[gId][0], &tableCartes[gId][1], &tableCartes[gId][2], &tableCartes[gId][3], 
+                                                                 &tableCartes[gId][4], &tableCartes[gId][5], &tableCartes[gId][6], &tableCartes[gId][7]);
+                  break;
             }
             synchro=0;
             //  pthread_mutex_unlock( &mutex );

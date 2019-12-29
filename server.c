@@ -340,6 +340,8 @@ int main(int argc, char *argv[])
                   sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);
 
         					// On envoie enfin un message a tout le monde pour definir qui est le joueur courant=0
+                  sprintf(reply, "M %d", 0);
+                  broadcastMessage(reply);
                   fsmServer=1;
 		            }
 		            break;
