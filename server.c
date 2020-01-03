@@ -365,7 +365,7 @@ int main(int argc, char *argv[])
                       // end game
                       sprintf(reply, "W %d %s",idJoueur, tcpClients[idJoueur].name);// on dis à tout le monde que le joueur courant à gagner
                       broadcastMessage(reply);
-                      //fsmServer=0;
+                      return 0;
                     }
                     else {
                       printf("you lossed !\n");
