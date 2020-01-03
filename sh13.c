@@ -144,7 +144,7 @@ int main(int argc, char ** argv)
     char sendBuffer[256];   // Buffer pour les messages à envoyer au serveur principal
     char lname[256];
     int id;
-
+    winner = -1;
     if (argc != 6)  // anciennement argc < 6
     {
       printf("<app> <Main server ip address> <Main server port> <Client ip address> <Client port> <player name>\n");
@@ -165,7 +165,8 @@ int main(int argc, char ** argv)
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
 
-    SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton;
+    SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton, *bwinner, *gameover;
+
 
   	deck[0] = IMG_Load("SH13_0.png");
   	deck[1] = IMG_Load("SH13_1.png");
@@ -192,7 +193,8 @@ int main(int argc, char ** argv)
 
   	gobutton = IMG_Load("gobutton.png");
   	connectbutton = IMG_Load("connectbutton.png");
-
+    bwinner = IMG_Load("winner.png");
+    gameover = IMG_Load("gameover.png");
   	strcpy(gNames[0],"-");
   	strcpy(gNames[1],"-");
   	strcpy(gNames[2],"-");
@@ -216,7 +218,7 @@ int main(int argc, char ** argv)
   	goEnabled=0;
   	connectEnabled=1;
 
-    SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8];
+    SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8],*texture_bwinner, *texture_gameover;
 
   	for (i=0;i<13;i++)
   		texture_deck[i] = SDL_CreateTextureFromSurface(renderer, deck[i]);
@@ -225,7 +227,8 @@ int main(int argc, char ** argv)
 
     texture_gobutton = SDL_CreateTextureFromSurface(renderer, gobutton);
     texture_connectbutton = SDL_CreateTextureFromSurface(renderer, connectbutton);
-
+    texture_bwinner = SDL_CreateTextureFromSurface(renderer, bwinner);
+    texture_gameover = SDL_CreateTextureFromSurface(renderer, gameover);
     TTF_Font* Sans = TTF_OpenFont("sans.ttf", 15);
     printf("Sans=%p\n",Sans);
 
@@ -674,7 +677,7 @@ int main(int argc, char ** argv)
 	}
 
 	// Le bouton go
-	if (goEnabled==1)
+	if (goEnabled==1 && winner == -1)
 	{
         	SDL_Rect dstrect = { 500, 350, 200, 150 };
         	SDL_RenderCopy(renderer, texture_gobutton, NULL, &dstrect);
@@ -685,6 +688,15 @@ int main(int argc, char ** argv)
         	SDL_Rect dstrect = { 0, 0, 200, 50 };
         	SDL_RenderCopy(renderer, texture_connectbutton, NULL, &dstrect);
 	}
+
+  if(winner == gId ){
+    SDL_Rect dstrect = { 500, 350,180, 180 };
+    SDL_RenderCopy(renderer, texture_bwinner, NULL, &dstrect);
+  }
+  else if(winner >= 0) {
+    SDL_Rect dstrect = { 500, 350,180, 180 };
+    SDL_RenderCopy(renderer, texture_gameover, NULL, &dstrect);
+  }
 
         //SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
         //SDL_RenderDrawLine(renderer, 0, 0, 200, 200);
