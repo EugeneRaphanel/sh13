@@ -363,15 +363,14 @@ int main(int argc, char *argv[])
                     if (guiltyGuessed == deck[12]) {
                       printf("you won !\n");
                       // end game
-                      sprintf(reply, "W %d", idJoueur);// on dis à tout le monde que le joueur courant à gagner
+                      sprintf(reply, "W %d %s",idJoueur, tcpClients[idJoueur].name);// on dis à tout le monde que le joueur courant à gagner
                       broadcastMessage(reply);
-                      fsmServer=1;
+                      //fsmServer=0;
                     }
                     else {
                       printf("you lossed !\n");
-                      // ajouter du code
-                      sprintf(reply, "R");// on dis au joueur qu'il a raté.
-                     sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
+                      sprintf(reply,"R");
+                      sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
                     }
                     break;
                 case 'O': // demande des objets à tout le monde

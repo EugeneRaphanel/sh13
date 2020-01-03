@@ -353,15 +353,17 @@ int main(int argc, char ** argv)
                   tableCartes[i][j] = val;
                   break;
               case 'W': //Un des joueurs à gagner le jeu
-              goEnabled = 0;
+              //goEnabled = 0;
               sscanf(gbuffer + 1, "%d", &winner);
+              printf(" numéro du winner : %d\n",winner);
+              //sscanf(gbuffer + 2, "%s", &winnername);
               if(gId == winner)
-                printf("You won bg");
+                printf("Vous êtes le grand gagnant bravo \n");
               else
-              printf("joueur %d a gagner",winner);
+              printf(" le gagnant est %s \n",gNames[winner]);
               break;
               case 'R': // Le joueur a raté son accusation
-              printf("accusation raté!!!");
+              printf("accusation raté!!! \n");
             }
             synchro=0;
             //  pthread_mutex_unlock( &mutex );
