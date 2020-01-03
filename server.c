@@ -370,6 +370,8 @@ int main(int argc, char *argv[])
                     else {
                       printf("you lossed !\n");
                       // ajouter du code
+                      sprintf(reply, "R");// on dis au joueur qu'il a raté.
+                     sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
                     }
                     break;
                 case 'O': // demande des objets à tout le monde

@@ -359,6 +359,9 @@ int main(int argc, char ** argv)
                 printf("You won bg");
               else
               printf("joueur %d a gagner",winner);
+              break;
+              case 'R': // Le joueur a raté son accusation
+              printf("accusation raté!!!");
             }
             synchro=0;
             //  pthread_mutex_unlock( &mutex );
