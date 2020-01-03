@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
 	joueurCourant=0; // premier arrrivé premier servi
 
     // initialise la table des connexions client : IP/PORT/NAME
-	for (i=0;i<4;i++) 
+	for (i=0;i<4;i++)
 	{
         	strcpy(tcpClients[i].ipAddress,"localhost");
         	tcpClients[i].port=-1;
@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
 	}
 
     // boucle serveur TCP
-    while (1) 
+    while (1)
     {
      	newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
      	if (newsockfd < 0)
@@ -279,10 +279,10 @@ int main(int argc, char *argv[])
         int idJoueur, guiltyGuessed, objectAsked, playerAsked;
 
         // machine à etat
-        // 0 => le jeu n'a pas encore commencé 
-        if (fsmServer==0) 
+        // 0 => le jeu n'a pas encore commencé
+        if (fsmServer==0)
         {
-        	switch (buffer[0]) 
+        	switch (buffer[0])
         	{
             	case 'C':
               	sscanf(buffer,"%c %s %d %s", &com, clientIpAddress, &clientPort, clientName);
@@ -363,6 +363,9 @@ int main(int argc, char *argv[])
                     if (guiltyGuessed == deck[12]) {
                       printf("you won !\n");
                       // end game
+                      sprintf(reply, "W %d", idJoueur);// on dis à tout le monde que le joueur courant à gagner
+                      broadcastMessage(reply);
+                      fsmServer=1;
                     }
                     else {
                       printf("you lossed !\n");
@@ -385,10 +388,10 @@ int main(int argc, char *argv[])
                     break;
         	}
           // désigne le prochain joueur
-          if (joueurCourant == 3) 
+          if (joueurCourant == 3)
             joueurCourant = 0;
-          else 
-            joueurCourant++; 
+          else
+            joueurCourant++;
           sprintf(reply, "M %d", joueurCourant);
           broadcastMessage(reply);
         }

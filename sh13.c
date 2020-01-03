@@ -29,7 +29,7 @@ int tableCartes[4][8];        // le joueur essaie d'obtenir le plus d'info possi
 int b[3];                     // cartes joueurs
 int goEnabled;                // apparait sur l'écran d'un joueur quand il peut joueur
 int connectEnabled;           // quand ==1, fait apparaitre un bouton qui permet de se connecter au serveur
-
+int winner;                   // contient le numéro du vainqueur
 char *nbobjets[]={"5","5","5","5","4","3","3","3"};
 char *nbnoms[]={"Sebastian Moran", "irene Adler", "inspector Lestrade",
   "inspector Gregson", "inspector Baynes", "inspector Bradstreet",
@@ -289,7 +289,7 @@ int main(int argc, char ** argv)
                     if (guiltSel!=-1)
                     {
                       sprintf(sendBuffer,"G %d %d",gId, guiltSel);
-                      sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer); 
+                      sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
                       // autre chose?
                     }
                     else if ((objetSel!=-1) && (joueurSel==-1))
@@ -301,7 +301,7 @@ int main(int argc, char ** argv)
                     else if ((objetSel!=-1) && (joueurSel!=-1))
                     {
                       sprintf(sendBuffer,"S %d %d %d",gId, joueurSel, objetSel);
-                      sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer); 
+                      sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
                       // autre chose?
                     }
                     printf("sendBuffer : %s\n", sendBuffer);
@@ -342,9 +342,9 @@ int main(int argc, char ** argv)
                   break;
               case 'M': // le joueur recoit le n° du joueur courant, et joue si il est désigné (goEnabled = 1 => bouton go dispo)
                   sscanf(gbuffer + 1, "%d", &joueurCourant);
-                  if (gId == joueurCourant) 
+                  if (gId == joueurCourant)
                     goEnabled = 1;
-                  else 
+                  else
                     goEnabled = 0;
                   break;
               case 'V':   // le joueur reçoit une valeur de table carte
@@ -352,6 +352,13 @@ int main(int argc, char ** argv)
                   sscanf(gbuffer + 1, "%d %d %d", &i, &j, &val);
                   tableCartes[i][j] = val;
                   break;
+              case 'W': //Un des joueurs à gagner le jeu
+              goEnabled = 0;
+              sscanf(gbuffer + 1, "%d", &winner);
+              if(gId == winner)
+                printf("You won bg");
+              else
+              printf("joueur %d a gagner",winner);
             }
             synchro=0;
             //  pthread_mutex_unlock( &mutex );
