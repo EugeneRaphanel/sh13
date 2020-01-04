@@ -30,7 +30,8 @@ char *nomcartes[]=
   "inspector Hopkins", "Sherlock Holmes", "John Watson", "Mycroft Holmes",
   "Mrs. Hudson", "Mary Morstan", "James Moriarty"};
 int joueurCourant;
-
+int joueurElimine[4];//est mis à un si le joueur se trompe dans sa déduction
+                    // il ne joue plus mais continue de répondre aux questions.
 void error(const char *msg)
 {
     perror(msg);
@@ -369,8 +370,14 @@ int main(int argc, char *argv[])
                     }
                     else {
                       printf("you lossed !\n");
+                      joueurElimine[idJoueur] = 1;
                       sprintf(reply,"R");
                       sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
+                      /*int cpt = 0;// test pour fermer le serveur si tous les joueurs ont perdu
+                      for(int i = 0; i < nbClients; i++ ){
+                        if(joueurElimine[i] == 1) {cpt ++;}
+                      }
+                      if(cpt == 4){ return 0;}*/
                     }
                     break;
                 case 'O': // demande des objets à tout le monde
@@ -389,12 +396,25 @@ int main(int argc, char *argv[])
                     break;
         	}
           // désigne le prochain joueur
-          if (joueurCourant == 3)
-            joueurCourant = 0;
-          else
-            joueurCourant++;
-          sprintf(reply, "M %d", joueurCourant);
-          broadcastMessage(reply);
+          int i = 0;
+          while(i < nbClients){
+            i++;
+            if (joueurCourant == 3)
+              joueurCourant = 0;
+            else
+              joueurCourant++;
+            printf(" joueurElimine[joueurCourant] : %d\n", joueurElimine[joueurCourant]);
+            if(joueurElimine[joueurCourant]!=1){
+              sprintf(reply, "M %d", joueurCourant);
+              broadcastMessage(reply);
+              break;
+          }
+          }
+          if(i >= nbClients && joueurElimine[joueurCourant] == 1) { // si tous les joueurs ont raté leur accusation.
+            sprintf(reply, "W %d %s",nbClients+1,"personne");// on envoie un nombre qui ne correspond à aucun joueur
+            broadcastMessage(reply);                        //ainsi tous les joueurs ont perdu
+          }
+
         }
      	close(newsockfd);
      }
