@@ -328,6 +328,7 @@ int main(int argc, char ** argv)
           // pthread_mutex_lock( &mutex );
           int joueurCourant;  // Id du joueur courant
           int i, j, val; // coordonnées tableCarte lors de la reception d'un message V
+          char ans;
           printf("consomme |%s|\n",gbuffer);
           switch (gbuffer[0])
           {

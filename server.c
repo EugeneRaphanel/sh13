@@ -382,10 +382,20 @@ int main(int argc, char *argv[])
                     break;
                 case 'O': // demande des objets à tout le monde
                     sscanf(buffer, "O %d %d", &idJoueur, &objectAsked);
-                    for (int i = 0; i < 4; i++) {
-                      sprintf(reply, "V %d %d %d", i, objectAsked, tableCartes[i][objectAsked]);
+                    /*for (int i = 0; i < 4; i++) {
+                      sprintf(reply, "V %d %d %d != 0", i, objectAsked, tableCartes[i][objectAsked]);
                       sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
-                    }
+                    }*/
+                    for (int i = 0; i < 4; i++) {
+                      if(i != idJoueur && tableCartes[i][objectAsked] != 0) {
+                        sprintf(reply, "V %d %d %d != 0", i, objectAsked, 100);
+                        sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
+                      }
+                      else  {
+                        sprintf(reply, "V %d %d %d != 0", i, objectAsked, tableCartes[i][objectAsked]);
+                        sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
+                      }
+                      }
                 		break;
         		    case 'S': // demande des objets à une seule personne.
               			sscanf(buffer,"S %d %d %d", &idJoueur, &playerAsked, &objectAsked);
