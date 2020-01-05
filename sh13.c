@@ -30,6 +30,7 @@ int b[3];                     // cartes joueurs
 int goEnabled;                // apparait sur l'écran d'un joueur quand il peut joueur
 int connectEnabled;           // quand ==1, fait apparaitre un bouton qui permet de se connecter au serveur
 int winner;                   // contient le numéro du vainqueur
+int rate;                    // dis si un joueur a raté sa tentative
 char *nbobjets[]={"5","5","5","5","4","3","3","3"};
 char *nbnoms[]={"Sebastian Moran", "irene Adler", "inspector Lestrade",
   "inspector Gregson", "inspector Baynes", "inspector Bradstreet",
@@ -165,7 +166,7 @@ int main(int argc, char ** argv)
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
 
-    SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton, *bwinner, *gameover;
+    SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton, *bwinner, *gameover, *fail;
 
 
   	deck[0] = IMG_Load("SH13_0.png");
@@ -195,6 +196,7 @@ int main(int argc, char ** argv)
   	connectbutton = IMG_Load("connectbutton.png");
     bwinner = IMG_Load("winner.png");
     gameover = IMG_Load("gameover.png");
+    fail = IMG_Load("failed.png");
   	strcpy(gNames[0],"-");
   	strcpy(gNames[1],"-");
   	strcpy(gNames[2],"-");
@@ -218,7 +220,7 @@ int main(int argc, char ** argv)
   	goEnabled=0;
   	connectEnabled=1;
 
-    SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8],*texture_bwinner, *texture_gameover;
+    SDL_Texture *texture_deck[13],*texture_gobutton,*texture_connectbutton,*texture_objet[8],*texture_bwinner, *texture_gameover, *texture_fail;
 
   	for (i=0;i<13;i++)
   		texture_deck[i] = SDL_CreateTextureFromSurface(renderer, deck[i]);
@@ -229,6 +231,7 @@ int main(int argc, char ** argv)
     texture_connectbutton = SDL_CreateTextureFromSurface(renderer, connectbutton);
     texture_bwinner = SDL_CreateTextureFromSurface(renderer, bwinner);
     texture_gameover = SDL_CreateTextureFromSurface(renderer, gameover);
+    texture_fail = SDL_CreateTextureFromSurface(renderer, fail);
     TTF_Font* Sans = TTF_OpenFont("sans.ttf", 15);
     printf("Sans=%p\n",Sans);
 
@@ -368,6 +371,7 @@ int main(int argc, char ** argv)
               break;
               case 'R': // Le joueur a raté son accusation
               printf("accusation raté!!! \n");
+              rate = 1;
             }
             synchro=0;
             //  pthread_mutex_unlock( &mutex );
@@ -698,6 +702,11 @@ int main(int argc, char ** argv)
     SDL_Rect dstrect = { 500, 350,180, 180 };
     SDL_RenderCopy(renderer, texture_gameover, NULL, &dstrect);
   }
+  else if (rate == 1){
+    SDL_Rect dstrect = { 500, 350,180, 180 };
+    SDL_RenderCopy(renderer, texture_fail, NULL, &dstrect);
+  }
+
 
         //SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
         //SDL_RenderDrawLine(renderer, 0, 0, 200, 200);
