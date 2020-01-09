@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
     int clientPort;
     int id;
     char reply[256];
-
+    int endgame = 0;
 
      if (argc < 2) {
          fprintf(stderr,"ERROR, no port provided\n");
@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
                       // end game
                       sprintf(reply, "W %d %s",idJoueur, tcpClients[idJoueur].name);// on dis à tout le monde que le joueur courant à gagner
                       broadcastMessage(reply);
-                      return 0;
+                      endgame = 1;
                     }
                     else {
                       printf("you lossed !\n");
@@ -422,9 +422,12 @@ int main(int argc, char *argv[])
           }
           if(i >= nbClients && joueurElimine[joueurCourant] == 1) { // si tous les joueurs ont raté leur accusation.
             sprintf(reply, "W %d %s",nbClients+1,"personne");// on envoie un nombre qui ne correspond à aucun joueur
-            broadcastMessage(reply);                        //ainsi tous les joueurs ont perdu
+            broadcastMessage(reply);                       //ainsi tous les joueurs ont perdu
+            endgame = 1;
           }
-
+        if(endgame){ // partie terminée
+          break;
+        }
         }
      	close(newsockfd);
      }
