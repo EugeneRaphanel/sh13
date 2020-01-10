@@ -426,7 +426,12 @@ int main(int argc, char *argv[])
             endgame = 1;
           }
         if(endgame){ // partie terminée
-          break;
+          fsmServer = 0; // pour attendre que les nouveaux clients arrivent
+          for( int i = 0; i <nbClients; i++){ // on efface les joueurs pour laisser de nouveaux se connecter
+           bzero((struct _client *) &tcpClients[i], sizeof(tcpClients[i]));
+          }
+          nbClients = 0;
+          //break;
         }
         }
      	close(newsockfd);
