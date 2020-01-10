@@ -387,20 +387,49 @@ int main(int argc, char *argv[])
                       sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
                     }*/
                     for (int i = 0; i < 4; i++) {
-                      if(i != idJoueur && tableCartes[i][objectAsked] != 0) {
+                    /*if(i != idJoueur && tableCartes[i][objectAsked] != 0) {
                         sprintf(reply, "V %d %d %d != 0", i, objectAsked, 100);
-                        sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
+                        //sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
+                          broadcastMessage(reply);
                       }
-                      else  {
+                      else if(i == idJoueur && tableCartes[i][objectAsked] != 0) {
+                          sprintf(reply, "V %d %d %d != 0", i, objectAsked, 100);
+                          //sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
+                            broadcastMessage(reply);
+                        }
+                      else {
                         sprintf(reply, "V %d %d %d != 0", i, objectAsked, tableCartes[i][objectAsked]);
-                        sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
+                        //sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
+                        broadcastMessage(reply);
+                      }*/
+                      if(i != idJoueur) {
+                          if(tableCartes[i][objectAsked] != 0){
+                          sprintf(reply, "V %d %d %d != 0", i, objectAsked, 100);
+                            //broadcastMessage(reply);
+                            for(int j = 0; j <4; j++){
+                            if(j =! i){
+                            sendMessageToClient(tcpClients[j].ipAddress, tcpClients[j].port, reply);
+                                  }
+                            else {
+                            sprintf(reply, "V %d %d %d != 0", i, objectAsked, tableCartes[i][objectAsked]);
+                            sendMessageToClient(tcpClients[j].ipAddress, tcpClients[j].port, reply);
+                            }
+
+                        }
                       }
+
+                        else {
+                          sprintf(reply, "V %d %d %d != 0", i, objectAsked,0);
+                            broadcastMessage(reply);
+                          }
                       }
+                    }
                 		break;
         		    case 'S': // demande des objets à une seule personne.
               			sscanf(buffer,"S %d %d %d", &idJoueur, &playerAsked, &objectAsked);
                     sprintf(reply, "V %d %d %d", playerAsked, objectAsked, tableCartes[playerAsked][objectAsked]);
-                    sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
+                    //sendMessageToClient(tcpClients[idJoueur].ipAddress, tcpClients[idJoueur].port, reply);
+                    broadcastMessage(reply);
               			break;
                 default:
                     break;
